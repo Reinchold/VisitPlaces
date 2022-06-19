@@ -1,0 +1,33 @@
+[
+  {
+    "featureType": "poi",
+    "stylers": [
+      {
+        "visibility": "off"
+      }
+    ]
+  },
+  {
+    "featureType": "poi.attraction",
+    "elementType": "geometry.stroke",
+    "stylers": [
+      {
+        "weight": 1
+      }
+    ]
+  },
+  {
+    "featureType": "transit.station",
+    "stylers": [
+      {
+        "saturation": -50
+      },
+      {
+        "lightness": 55
+      },
+      {
+        "visibility": "simplified"
+      }
+    ]
+  }
+]
