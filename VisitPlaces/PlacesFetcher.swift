@@ -38,8 +38,8 @@ struct PlacesFetcher: UIViewControllerRepresentable {
 
     func updateUIViewController(_ uiViewController: WrapperFetcherViewController, context: Context) {
         guard !rootViewModel.searchInput.isEmpty else {
-            if !rootViewModel.searchOutput.isEmpty {
-                rootViewModel.searchOutput.removeAll()
+            if !rootViewModel.searchOutputs.isEmpty {
+                rootViewModel.searchOutputs.removeAll()
                 rootViewModel.searchInputCheck.removeAll()
             }
             return
@@ -58,7 +58,7 @@ struct PlacesFetcher: UIViewControllerRepresentable {
 
         func didAutocomplete(with predictions: [GMSAutocompletePrediction]) {
             guard parent.rootViewModel.searchInput != parent.rootViewModel.searchInputCheck else { return }
-            parent.rootViewModel.searchOutput = predictions
+            parent.rootViewModel.searchOutputs = predictions
             parent.rootViewModel.searchInputCheck = parent.rootViewModel.searchInput
         }
         

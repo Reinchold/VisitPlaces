@@ -1,19 +1,19 @@
 // This file was generated from JSON Schema using quicktype, do not modify it directly.
 // To parse the JSON, add this file to your project and do:
 //
-//   let googleModel = try? newJSONDecoder().decode(GoogleModel.self, from: jsonData)
+//   let googlePlaces = try? newJSONDecoder().decode(GooglePlaces.self, from: jsonData)
 
 import Foundation
 import MapKit
 
 // MARK: - Res
-struct GoogleModel: Codable {
-    let results: [Result]
+struct GooglePlaces: Codable {
+    let results: [ResultPlaces]
     let status: String
 }
 
 // MARK: - Result
-struct Result: Codable {
+struct ResultPlaces: Codable {
     let businessStatus: String?
     let geometry: Geometry
     let icon: String
@@ -42,6 +42,11 @@ struct Geometry: Codable {
 struct Location: Codable {
     var id: String? = UUID().uuidString
     let lat, lng: Double
+    
+    init() {
+        self.lat = .zero
+        self.lng = .zero
+    }
 }
 
 // MARK: - Equatable Location 

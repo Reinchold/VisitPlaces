@@ -29,8 +29,9 @@ final class RootViewModel: ObservableObject {
     
     // output
     @Published var searchInputCheck: String = ""
-    @Published var searchOutput = [GMSAutocompletePrediction]()
-    @Published var interestPoints = [Result]()
+    @Published var searchOutputs = [GMSAutocompletePrediction]()
+    @Published var searchOutput: GMSAutocompletePrediction?
+    @Published var interestPoints = [ResultPlaces]()
     @Published var articlesError: APIError?
     
     var isNeedsMapUpdate = false
@@ -89,20 +90,18 @@ final class RootViewModel: ObservableObject {
     private func observePlaces() {
         Publishers.CombineLatest(validRecommendation, validLocationRadius)
             .setFailureType(to: APIError.self)
-            .flatMap {  (point, radius) -> AnyPublisher<[Result], APIError> in
+            .flatMap {  (point, radius) -> AnyPublisher<[ResultPlaces], APIError> in
                 
-                self.interestPoints = [Result]()
+                self.interestPoints = [ResultPlaces]()
                 let item = String(Int(radius))
-                return API.shared.fetchRecommendations(from: Endpoint.endpoint(type: point, radius: item))
+                return API.shared.fetchRecommendations(from: Endpoint.place(type: point, radius: item))
             }
             .sink(
-                receiveCompletion:  {[unowned self] (completion) in
+                receiveCompletion: { [unowned self] (completion) in
                     if case let .failure(error) = completion {
-//                        print("🍎: \(error)")
                         self.articlesError = error
                     }},
                 receiveValue: { [unowned self] in
-//                    print("☘️: \($0.count)")
                     self.interestPoints = $0
                     self.isNeedsMapUpdate = true
                 })
@@ -114,10 +113,27 @@ final class RootViewModel: ObservableObject {
             }
             .store(in: &self.cancellableSet)
         
-        $searchOutput
+        $searchOutputs
             .map {!$0.isEmpty }
             .assign(to: \.isShownSearchResultView, on: self)
             .store(in: &self.cancellableSet)
         
+    }
+    
+    func getGeocoding() {
+        API.shared.fetchPointDetail(from: Endpoint.geocode(address: searchInput))
+            .sink(receiveCompletion: { [unowned self] (completion) in
+                if case let .failure(error) = completion {
+                    self.articlesError = error
+                }},
+                  receiveValue: { geocoding in
+                guard let location = geocoding.map { $0.geometry.location }.first else { return }
+                
+                GMSCameraPosition.location = CLLocationCoordinate2D(latitude: location.lat,
+                                                                    longitude: location.lng)
+                self.cameraPosition =  GMSCameraPosition.berlin
+                self.isNeedsMapUpdate = true
+            })
+            .store(in: &self.cancellableSet)
     }
 }

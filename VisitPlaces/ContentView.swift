@@ -60,18 +60,7 @@ struct ContentView: View {
                     .cornerRadius(8)
                     .shadow(radius: 3)
                     
-                    // Search TextField
-                    TextField("", text: $rootViewModel.searchInput)
-                        .placeholder(when: rootViewModel.searchInput.isEmpty) {
-                            Text("Enter address").foregroundColor(.red).opacity(0.5)
-                        }
-                        .font(.title3)
-                        .accentColor(.red)
-                        .foregroundColor(.red)
-                        .padding(.all, 15)
-                        .background(Color.white)
-                        .cornerRadius(10)
-                        .shadow(radius: 3)
+                    SearchTextField()
                 }
                 .padding(.top, UIApplication
                     .shared

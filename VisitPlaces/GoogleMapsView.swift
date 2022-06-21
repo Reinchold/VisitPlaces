@@ -18,7 +18,7 @@ struct GoogleMapsView: UIViewRepresentable {
     }
     
     @ObservedObject var rootViewModel: RootViewModel
-    @Binding var landmarks: [Result]
+    @Binding var landmarks: [ResultPlaces]
     
     private let angle: Double = 10
     private let bearing: CLLocationDirection = 10
