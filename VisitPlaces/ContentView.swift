@@ -69,9 +69,9 @@ struct ContentView: View {
 //                    PlacesListView()
 //                }
 //                
-//                ModalView(orientationShapeWidth: UIScreen.main.bounds.size.width, modalHeight: 300) {
-//                    PlacesListView()
-//                }
+                ModalView(orientationShapeWidth: UIScreen.main.bounds.size.width, modalHeight: 300) {
+                    PlacesListView()
+                }
             }
             .cornerRadius(self.rootViewModel.isShownSettingView ? 30 : 0)
             .scaleEffect(self.rootViewModel.isShownSettingView ? 0.9 : 1)

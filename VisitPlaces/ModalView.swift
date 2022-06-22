@@ -33,7 +33,6 @@ enum DragState {
 
 struct ModalView<Content: View> : View {
     
-    @Binding var isActive: Bool
     @EnvironmentObject var rootViewModel: RootViewModel
 
     @Environment(\.colorScheme) var colorScheme
@@ -89,7 +88,7 @@ struct ModalView<Content: View> : View {
                         }
                         .padding(.top, spacer)
                     }
-                    .offset(y: rootViewModel.isShownAutocompletePredictions && !rootViewModel.isShownSettingView ? ((self.dragState.isDragging && dragState.translation.height >= 1) ? dragState.translation.height : 0) : modalHeight+spacer)
+                    .offset(y: rootViewModel.isShownAutocompleteModalView ? ((self.dragState.isDragging && dragState.translation.height >= 1) ? dragState.translation.height : 0) : modalHeight+spacer)
                     .animation(.interpolatingSpring(stiffness: 200, damping: 30.0, initialVelocity: 10.0))
                     .gesture(drag)
                 }
@@ -102,7 +101,7 @@ struct ModalView<Content: View> : View {
     private func onDragEnded(drag: DragGesture.Value) {
         let dragThreshold = modalHeight * (2/3)
         if drag.predictedEndTranslation.height > dragThreshold || drag.translation.height > dragThreshold {
-            rootViewModel.isShownAutocompletePredictions.toggle()
+            rootViewModel.autocompletePredictions.removeAll()
         }
     }
 }

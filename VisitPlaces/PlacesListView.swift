@@ -24,7 +24,7 @@ struct PlacesListView: View {
                         Task {
                             try await Task.sleep(seconds: 1)
                             // FIXME: - change the logic for adding text to the search field
-                            rootViewModel.isShownAutocompletePredictions = false
+                            rootViewModel.autocompletePredictions.removeAll()
                         }
                     }) {
                         VStack(alignment: .leading) {

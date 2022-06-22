@@ -14,6 +14,8 @@ final class RootViewModel: ObservableObject {
     // GMSAutocompleteFetcher wrapped to UIViewController
     let fetcherViewController = WrapperFetcherViewController()
     
+    var isNeedsMapUpdate = false
+    
     // GoogleMaps markers
     var markers: [GMSMarker] = []
     
@@ -22,14 +24,13 @@ final class RootViewModel: ObservableObject {
     @Published var searchTextFieldCheck: String = ""
 
     @Published var cameraPosition: GMSCameraPosition?
-    @Published var placeID: String = ""
     @Published var searchType = "bar"
     @Published var locationRadius: Float = 200.0
     
-    @Published var isShownAutocompleteValid = false
+    @Published var isShownAutocompleteModalView = false
     @Published var isShownSettingView = false
-    @Published var isShownAutocompletePredictions = false
     @Published var isShownPlaceDetail = false
+    
     @Published var keyboardHeight: CGFloat = .zero
     
     // output
@@ -40,7 +41,6 @@ final class RootViewModel: ObservableObject {
     
     private var cancellableSet: Set<AnyCancellable> = []
     
-    var isNeedsMapUpdate = false
         
     init() {
         locationPlaceID()
@@ -76,7 +76,7 @@ final class RootViewModel: ObservableObject {
     }
     
     private func observePlaces() {
-        Publishers.CombineLatest3(validRecommendation, validLocationRadius, $cameraPosition)
+        Publishers.CombineLatest3(searchTypePublisher, locationRadiusPublisher, $cameraPosition)
             .setFailureType(to: APIError.self)
             .flatMap { (point, radius, _) -> AnyPublisher<[ResultPlaces], APIError> in
                 self.resultPlaces = [ResultPlaces]()
@@ -94,15 +94,10 @@ final class RootViewModel: ObservableObject {
                 })
             .store(in: &self.cancellableSet)
         
-        $autocompletePredictions
-            .map {!$0.isEmpty }
-            .assign(to: \.isShownAutocompletePredictions, on: self)
-            .store(in: &self.cancellableSet)
-        
-        predictionsModalViewPublisher
+        Publishers.CombineLatest($autocompletePredictions, $isShownSettingView)
             .receive(on: RunLoop.main)
-            .map { $0 }
-            .assign(to: \.isShownAutocompleteValid, on: self)
+            .map { !$0.isEmpty && !$1 }
+            .assign(to: \.isShownAutocompleteModalView, on: self)
             .store(in: &cancellableSet)
     }
     
@@ -124,27 +119,22 @@ final class RootViewModel: ObservableObject {
     }
 }
 
+// MARK: - AnyPublisher
+
 extension RootViewModel {
     
     // Reduce server requests
-    private var validRecommendation: AnyPublisher<String, Never> {
+    private var searchTypePublisher: AnyPublisher<String, Never> {
         $searchType
             .debounce(for: 0.5, scheduler: RunLoop.main)
             .removeDuplicates()
             .eraseToAnyPublisher()
     }
     
-    private var validLocationRadius: AnyPublisher<Float, Never> {
+    private var locationRadiusPublisher: AnyPublisher<Float, Never> {
         $locationRadius
             .debounce(for: 0.5, scheduler: RunLoop.main)
             .removeDuplicates()
-            .eraseToAnyPublisher()
-    }
-    
-    var predictionsModalViewPublisher: AnyPublisher<Bool, Never> {
-        Publishers.CombineLatest($isShownAutocompletePredictions, $isShownSettingView)
-            .receive(on: RunLoop.main)
-            .map { $0 && !$1 }
             .eraseToAnyPublisher()
     }
     

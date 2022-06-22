@@ -56,7 +56,7 @@ struct SearchField: View {
                     // Search button
                     Button(action: {
                         rootViewModel.getGeocoding()
-                        rootViewModel.isShownAutocompletePredictions = false
+                        rootViewModel.autocompletePredictions.removeAll()
                     }, label: {
                         Image(systemName: "magnifyingglass")
                             .resizable()
