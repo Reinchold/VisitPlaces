@@ -15,15 +15,16 @@ struct PlacesListView: View {
     var body: some View {
  
             List {
-                ForEach(rootViewModel.searchOutputs, id: \.self) { index in
+                ForEach(rootViewModel.autocompletePredictions, id: \.self) { index in
                     Button(action: {
                         rootViewModel.getLatLongFromAutocompletePrediction(prediction: index)
-                        rootViewModel.searchOutput = index
-                        rootViewModel.searchInput = index.attributedFullText.string
+                        rootViewModel.autocompletePrediction = index
+                        rootViewModel.searchTextField = index.attributedFullText.string
+                        
                         Task {
                             try await Task.sleep(seconds: 1)
                             // FIXME: - change the logic for adding text to the search field
-                            rootViewModel.isShownSearchResultView = false
+                            rootViewModel.isShownAutocompletePredictions = false
                         }
                     }) {
                         VStack(alignment: .leading) {

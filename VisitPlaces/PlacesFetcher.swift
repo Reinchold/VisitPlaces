@@ -33,18 +33,20 @@ struct PlacesFetcher: UIViewControllerRepresentable {
         rootViewModel.fetcherViewController.fetcher = GMSAutocompleteFetcher(filter: filter)
         rootViewModel.fetcherViewController.fetcher?.delegate = context.coordinator
         rootViewModel.fetcherViewController.fetcher?.provide(token)
+        
         return rootViewModel.fetcherViewController
     }
 
     func updateUIViewController(_ uiViewController: WrapperFetcherViewController, context: Context) {
-        guard !rootViewModel.searchInput.isEmpty else {
-            if !rootViewModel.searchOutputs.isEmpty {
-                rootViewModel.searchOutputs.removeAll()
-                rootViewModel.searchInputCheck.removeAll()
+        guard !rootViewModel.searchTextField.isEmpty
+        else {
+            if !rootViewModel.autocompletePredictions.isEmpty {
+                rootViewModel.autocompletePredictions.removeAll()
+                rootViewModel.searchTextFieldCheck.removeAll()
             }
             return
         }
-        rootViewModel.fetcherViewController.fetcher?.sourceTextHasChanged(rootViewModel.searchInput)
+        rootViewModel.fetcherViewController.fetcher?.sourceTextHasChanged(rootViewModel.searchTextField)
     } 
 
     class Coordinator: NSObject, GMSAutocompleteFetcherDelegate {
@@ -57,9 +59,9 @@ struct PlacesFetcher: UIViewControllerRepresentable {
         }
 
         func didAutocomplete(with predictions: [GMSAutocompletePrediction]) {
-            guard parent.rootViewModel.searchInput != parent.rootViewModel.searchInputCheck else { return }
-            parent.rootViewModel.searchOutputs = predictions
-            parent.rootViewModel.searchInputCheck = parent.rootViewModel.searchInput
+            guard parent.rootViewModel.searchTextField != parent.rootViewModel.searchTextFieldCheck else { return }
+            parent.rootViewModel.autocompletePredictions = predictions
+            parent.rootViewModel.searchTextFieldCheck = parent.rootViewModel.searchTextField
         }
         
         func didFailAutocompleteWithError(_ error: Error) {

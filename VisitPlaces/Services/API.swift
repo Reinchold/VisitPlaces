@@ -17,7 +17,7 @@ enum Endpoint {
     case place(type: String, radius: String)
     case geocode(address: String)
     
-    var baseURL: URL {URL(string: "https://maps.googleapis.com/maps/api")!}
+    var baseURL: URL { URL(string: "https://maps.googleapis.com/maps/api")! }
     
     func path() -> String {
         switch self {

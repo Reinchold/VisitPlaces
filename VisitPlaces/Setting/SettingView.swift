@@ -37,11 +37,11 @@ struct CheckboxField: View, Identifiable {
     
     var body: some View {
         Button(action:{
-            rootViewModel.recommendationID = id
+            rootViewModel.searchType = id
             self.callback(self.id)
         }) {
             HStack(alignment: .center, spacing: 10) {
-                Image(systemName: rootViewModel.recommendationID.contains(id) ? "checkmark.square" : "square")
+                Image(systemName: rootViewModel.searchType.contains(id) ? "checkmark.square" : "square")
                     .resizable()
                     .foregroundColor(self.color.opacity(0.7))
                     .aspectRatio(contentMode: .fit)
@@ -83,8 +83,9 @@ enum SectionList: String, CaseIterable {
 }
 
 struct SettingView: View {
-    @State private var checkboxField: [CheckboxField] = [CheckboxField]()
+    
     @EnvironmentObject var rootViewModel: RootViewModel
+    @State private var checkboxField: [CheckboxField] = [CheckboxField]()
     
     var body: some View {
         VStack {

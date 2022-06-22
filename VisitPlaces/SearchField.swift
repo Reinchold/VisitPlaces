@@ -1,5 +1,5 @@
 //
-//  SearchTextField.swift
+//  SearchField.swift
 //  VisitPlaces
 //
 //  Created by Roman Vostrikov on 20.06.22.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct SearchTextField: View {
+struct SearchField: View {
     
     @EnvironmentObject var rootViewModel: RootViewModel
     
@@ -15,35 +15,52 @@ struct SearchTextField: View {
         Section {
             ZStack {
                 HStack {
+                    
+                    // Show setting view button
+                    Button(action: {
+                        withAnimation {
+                            self.rootViewModel.isShownSettingView.toggle()
+                        }
+                    }) {
+                        Image(systemName: self.rootViewModel.isShownSettingView ? "xmark" : "line.horizontal.3")
+                            .resizable()
+                            .frame(width: self.rootViewModel.isShownSettingView ? 18 : 22, height: 18)
+                            .scaledToFit()
+                            .foregroundColor(Color.red.opacity(0.9))
+                    }
+                    
                     // Search TextField
-                    TextField("", text: $rootViewModel.searchInput)
-                        .placeholder(when: rootViewModel.searchInput.isEmpty) {
+                    TextField("", text: $rootViewModel.searchTextField)
+                        .placeholder(when: rootViewModel.searchTextField.isEmpty) {
                             Text("Enter address").foregroundColor(.red).opacity(0.5)
                         }
                         .font(.title3)
                         .accentColor(.red)
                         .foregroundColor(.red)
+                        .padding(.leading, 10)
+                        .disabled(rootViewModel.isShownSettingView)
                         
-                    
-                    if rootViewModel.searchInput != "" {
+                    // Delete text button
+                    if rootViewModel.searchTextField != "" {
                         Image(systemName: "xmark.circle.fill")
                             .imageScale(.medium)
-                            .foregroundColor(Color(.systemGray3))
+                            .foregroundColor(Color.red.opacity(0.7))
                             .padding(3)
                             .onTapGesture {
                                 withAnimation {
-                                    rootViewModel.searchInput = ""
+                                    rootViewModel.searchTextField = ""
                                 }
                             }
                     }
                     
+                    // Search button
                     Button(action: {
                         rootViewModel.getGeocoding()
-                        rootViewModel.isShownSearchResultView = false
+                        rootViewModel.isShownAutocompletePredictions = false
                     }, label: {
                         Image(systemName: "magnifyingglass")
                             .resizable()
-                            .foregroundColor(Color.secondary)
+                            .foregroundColor(Color.red.opacity(0.9))
                             .shadow(color: Color.primary.opacity(0.3),
                                     radius: 5,
                                     x: 1,
@@ -51,7 +68,7 @@ struct SearchTextField: View {
                             .aspectRatio(contentMode: .fit)
                     })
                     .buttonStyle(PlainButtonStyle())
-                    .frame(width: 30, height: 40, alignment: .center)
+                    .frame(width: 20, height: 20, alignment: .center)
                     .padding(.trailing, 10)
                 }
                 .padding(.all, 15)

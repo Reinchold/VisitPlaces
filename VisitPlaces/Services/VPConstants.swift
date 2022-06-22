@@ -17,5 +17,5 @@ enum VPConstants {
 
 extension GMSCameraPosition  {
     static var location = CLLocationCoordinate2D(latitude: 52.521992, longitude: 13.413244)
-    static var berlin = GMSCameraPosition.camera(withTarget: location, zoom: 15, bearing: 0, viewingAngle: 0)
+    static var cameraPosition = GMSCameraPosition.camera(withTarget: location, zoom: 15, bearing: 0, viewingAngle: 0)
 }

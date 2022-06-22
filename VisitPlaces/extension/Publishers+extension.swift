@@ -11,7 +11,6 @@ import Combine
 extension Publishers {
 
     static var keyboardHeight: AnyPublisher<CGFloat, Never> {
-
         let willShow = NotificationCenter.default.publisher(for: UIApplication.keyboardWillShowNotification)
             .map { $0.keyboardHeight }
         

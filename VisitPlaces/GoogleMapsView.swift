@@ -12,13 +12,7 @@ import GooglePlaces
 
 struct GoogleMapsView: UIViewRepresentable {
     
-    enum IconType {
-        case icon
-        case iconView
-    }
-    
-    @ObservedObject var rootViewModel: RootViewModel
-    @Binding var landmarks: [ResultPlaces]
+    @EnvironmentObject var rootViewModel: RootViewModel
     
     private let angle: Double = 10
     private let bearing: CLLocationDirection = 10
@@ -32,7 +26,7 @@ struct GoogleMapsView: UIViewRepresentable {
         let mapView = GMSMapView(frame: .zero, camera: camera!)
         mapView.delegate = context.coordinator
         
-        // style
+        // Map style
         do {
             mapView.mapStyle = try GMSMapStyle(named: "style")
         } catch {
@@ -47,83 +41,76 @@ struct GoogleMapsView: UIViewRepresentable {
         rootViewModel.isNeedsMapUpdate = false
                 
         /// Remove markers
+        rootViewModel.markers.removeAll()
         mapView.clear()
         
         // Places of interest
-        // GMSMarker.markerImage(with: UIColor(hue: CGFloat.random(in: 0..<1), saturation: 1, brightness: 1, alpha: 1))
-        let newAnnotations = landmarks.map {
+        let newAnnotations = rootViewModel.resultPlaces.map {
             LandmarkAnnotation(title: $0.name,
                                subtitle: $0.vicinity,
                                coordinate: $0.geometry.location.coordinate,
-                                      icon: UIImage(named: rootViewModel.recommendationID)!)  }
-        newAnnotations.forEach { self.markerCreator(mapView, annotation: $0, iconType: .iconView) }
+                               icon: UIImage(named: rootViewModel.searchType)!)  }
+        newAnnotations.forEach { self.markerCreator(mapView, annotation: $0) }
         
         // Location of the found place
         let location = GMSCameraPosition.location
-        let annotation = LandmarkAnnotation(title: "", subtitle: "The place that I was looking for", coordinate: location, icon: GMSMarker.markerImage(with: UIColor.red))
-        markerCreator(mapView, annotation: annotation, iconType: .icon)
+        let annotation = LandmarkAnnotation(title: "", subtitle: "The place that I was looking for", coordinate: location, icon: UIImage(named: "search")!)
+        markerCreator(mapView, annotation: annotation)
         
         // Change location if necessary
         moveCamera(mapView)
+        
+        fitBounds(mapView)
     }
     
     // MARK: - Marker Creator
-    func markerCreator(_ mapView: GMSMapView, annotation: LandmarkAnnotation, iconType: IconType) {
+    func markerCreator(_ mapView: GMSMapView, annotation: LandmarkAnnotation) {
         let marker = GMSMarker(position: annotation.coordinate)
         marker.title = annotation.title
         marker.snippet = annotation.subtitle
         marker.appearAnimation = .pop
         marker.rotation = Double.random(in: -10...10)
-        
-        switch iconType {
-        case .icon:
-            marker.icon = annotation.icon
-        case .iconView:
-            let imageView = UIImageView(frame: CGRect(origin: .zero, size: CGSize(width: 35, height: 35)))
-            imageView.image = annotation.icon.withRenderingMode(.alwaysOriginal)
-            marker.iconView = imageView
-        }
-        
+        marker.icon = annotation.icon
+        marker.setIconSize(scaledToSize: .init(width: 35, height: 35))
+        rootViewModel.markers.append(marker)
         marker.map = mapView
+    }
+    
+    // MARK: - Fit marker bounds
+    func fitBounds(_ mapView: GMSMapView) {
+        guard !rootViewModel.markers.isEmpty else { return }
+        
+        var bounds = GMSCoordinateBounds()
+        for marker in rootViewModel.markers {
+            bounds = bounds.includingCoordinate(marker.position)
+        }
+        guard bounds.isValid else { return }
+        mapView.moveCamera(GMSCameraUpdate.fit(bounds, withPadding: 100))
     }
     
     // MARK: - Change location
     func moveCamera(_ mapView: GMSMapView) {
-        let newPosition = GMSCameraPosition(
-            target: GMSCameraPosition.location, zoom: 15, bearing: 0, viewingAngle: 0)
+        let newPosition = GMSCameraPosition(target: GMSCameraPosition.location, zoom: 15, bearing: 0, viewingAngle: 0)
         mapView.animate(to: newPosition)
-        
-        print("coordinate: \(GMSCameraPosition.location)")
     }
     
     final class Coordinator: NSObject, GMSMapViewDelegate {
+        
         var parent: GoogleMapsView
-        let infoMarker = GMSMarker()
         
         init(_ parent: GoogleMapsView) {
             self.parent = parent
         }
         
-        func mapView(_ mapView: GMSMapView, didTapPOIWithPlaceID placeID: String, name: String, location: CLLocationCoordinate2D) {
-            infoMarker.snippet = placeID
-            infoMarker.position = location
-            infoMarker.title = name
-            infoMarker.opacity = 0;
-            infoMarker.infoWindowAnchor.y = 1
-            infoMarker.map = mapView
-            mapView.selectedMarker = infoMarker
-            print("😀: \(placeID)")
-            parent.rootViewModel.placeID = name
+        func mapView(_ mapView: GMSMapView, didTap marker: GMSMarker) -> Bool {
+            marker.setIconSize(scaledToSize: .init(width: 45, height: 45))
+            return false
+        }
+        
+        func mapView(_ mapView: GMSMapView, didCloseInfoWindowOf marker: GMSMarker) {
+            marker.setIconSize(scaledToSize: .init(width: 35, height: 35))
+            marker.tracksInfoWindowChanges = false
         }
     }
 
-}
-
-extension GMSMapStyle {
-    convenience init?(named fileName: String) throws {
-        guard let styleURL = Bundle.main.url(forResource: fileName, withExtension: "json") else {
-            return nil
-        }
-        try self.init(contentsOfFileURL: styleURL)
-    }
 }
