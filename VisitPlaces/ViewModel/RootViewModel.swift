@@ -23,7 +23,7 @@ final class RootViewModel: ObservableObject {
     @Published var searchTextField: String = ""
     @Published var searchTextFieldCheck: String = ""
 
-    @Published var cameraPosition: GMSCameraPosition?
+    @Published var cameraPosition: GMSCameraPosition = GMSCameraPosition.cameraPosition
     @Published var searchType = "bar"
     @Published var locationRadius: Float = 200.0
     
@@ -43,18 +43,7 @@ final class RootViewModel: ObservableObject {
     
         
     init() {
-        locationPlaceID()
         observePlaces()
-    }
-    
-    func locationPlaceID()  {
-        $cameraPosition
-            .sink { position in
-                if position == nil {
-                    self.cameraPosition = GMSCameraPosition.cameraPosition
-                }
-            }
-            .store(in: &self.cancellableSet)
     }
     
     func getLatLongFromAutocompletePrediction(prediction: GMSAutocompletePrediction) {
@@ -66,9 +55,7 @@ final class RootViewModel: ObservableObject {
             }
 
             if let place = place {
-                GMSCameraPosition.location = CLLocationCoordinate2D(latitude: place.coordinate.latitude,
-                                                                    longitude: place.coordinate.longitude)
-                self.cameraPosition =  GMSCameraPosition.cameraPosition
+                self.cameraPosition = GMSCameraPosition(latitude: place.coordinate.latitude, longitude: place.coordinate.longitude, zoom: 15)
             } else {
                 //show error
             }
@@ -78,10 +65,11 @@ final class RootViewModel: ObservableObject {
     private func observePlaces() {
         Publishers.CombineLatest3(searchTypePublisher, locationRadiusPublisher, $cameraPosition)
             .setFailureType(to: APIError.self)
-            .flatMap { (point, radius, _) -> AnyPublisher<[ResultPlaces], APIError> in
+            .flatMap { (point, radius, position) -> AnyPublisher<[ResultPlaces], APIError> in
                 self.resultPlaces = [ResultPlaces]()
                 let item = String(Int(radius))
-                return API.shared.fetchRecommendations(from: Endpoint.place(type: point, radius: item))
+                let coordinate = "\(position.target.latitude),\(position.target.longitude)"
+                return API.shared.fetchRecommendations(from: Endpoint.place(type: point, radius: item, coordinate: coordinate))
             }
             .sink(
                 receiveCompletion: { [unowned self] (completion) in
@@ -111,9 +99,7 @@ final class RootViewModel: ObservableObject {
                 }, receiveValue: { geocoding in
                     guard let location = geocoding.map({ $0.geometry.location }).first else { return }
                     
-                    GMSCameraPosition.location = CLLocationCoordinate2D(latitude: location.lat,
-                                                                        longitude: location.lng)
-                    self.cameraPosition =  GMSCameraPosition.cameraPosition
+                    self.cameraPosition = GMSCameraPosition(latitude: location.lat, longitude: location.lng, zoom: 15)
                 })
             .store(in: &self.cancellableSet)
     }

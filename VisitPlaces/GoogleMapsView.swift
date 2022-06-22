@@ -23,7 +23,7 @@ struct GoogleMapsView: UIViewRepresentable {
     
     func makeUIView(context: Context) -> GMSMapView {
         let camera = rootViewModel.cameraPosition
-        let mapView = GMSMapView(frame: .zero, camera: camera!)
+        let mapView = GMSMapView(frame: .zero, camera: camera)
         mapView.delegate = context.coordinator
         
         // Map style
@@ -53,7 +53,7 @@ struct GoogleMapsView: UIViewRepresentable {
         newAnnotations.forEach { self.markerCreator(mapView, annotation: $0) }
         
         // Location of the found place
-        let location = GMSCameraPosition.location
+        let location = rootViewModel.cameraPosition.target
         let annotation = LandmarkAnnotation(title: "", subtitle: "The place that I was looking for", coordinate: location, icon: UIImage(named: "search")!)
         markerCreator(mapView, annotation: annotation)
         
@@ -90,7 +90,7 @@ struct GoogleMapsView: UIViewRepresentable {
     
     // MARK: - Change location
     func moveCamera(_ mapView: GMSMapView) {
-        let newPosition = GMSCameraPosition(target: GMSCameraPosition.location, zoom: 15, bearing: 0, viewingAngle: 0)
+        let newPosition = rootViewModel.cameraPosition
         mapView.animate(to: newPosition)
     }
     

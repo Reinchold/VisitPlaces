@@ -14,7 +14,7 @@ import GoogleMaps
 import Combine
 
 enum Endpoint {
-    case place(type: String, radius: String)
+    case place(type: String, radius: String, coordinate: String)
     case geocode(address: String)
     
     var baseURL: URL { URL(string: "https://maps.googleapis.com/maps/api")! }
@@ -34,9 +34,9 @@ enum Endpoint {
             return nil
         }
         switch self {
-        case let .place(type, radius):
+        case let .place(type, radius, position):
             urlComponents.queryItems = [
-                URLQueryItem(name: "location", value: "\(GMSCameraPosition.location.latitude),\(GMSCameraPosition.location.longitude)" ),
+                URLQueryItem(name: "location", value: position),
                 URLQueryItem(name: "radius", value: radius),
                 URLQueryItem(name: "type", value: type),
                 URLQueryItem(name: "key", value: VPConstants.apiKey)
