@@ -49,7 +49,8 @@ struct GoogleMapsView: UIViewRepresentable {
             LandmarkAnnotation(title: $0.name,
                                subtitle: $0.vicinity,
                                coordinate: $0.geometry.location.coordinate,
-                               icon: UIImage(named: rootViewModel.searchType)!)  }
+                               icon: UIImage(named: rootViewModel.searchType)!,
+                               placeID: $0.placeId)  }
         newAnnotations.forEach { self.markerCreator(mapView, annotation: $0) }
         
         // Location of the found place
@@ -68,6 +69,7 @@ struct GoogleMapsView: UIViewRepresentable {
         let marker = GMSMarker(position: annotation.coordinate)
         marker.title = annotation.title
         marker.snippet = annotation.subtitle
+        marker.userData = annotation.placeID
         marker.appearAnimation = .pop
         marker.rotation = Double.random(in: -10...10)
         marker.icon = annotation.icon
@@ -104,6 +106,10 @@ struct GoogleMapsView: UIViewRepresentable {
         
         func mapView(_ mapView: GMSMapView, didTap marker: GMSMarker) -> Bool {
             marker.setIconSize(scaledToSize: .init(width: 45, height: 45))
+            
+            parent.rootViewModel.placeDetails(marker.userData as? String)
+            parent.rootViewModel.placePhotos(marker.userData as? String)
+            
             return false
         }
         

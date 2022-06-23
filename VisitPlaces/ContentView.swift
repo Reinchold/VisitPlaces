@@ -12,7 +12,6 @@ struct ContentView: View {
     
     @EnvironmentObject var rootViewModel: RootViewModel
     
-    
     var body: some View {
         
         ZStack(alignment: .bottom) {
@@ -65,11 +64,11 @@ struct ContentView: View {
                     .padding()
                 
                 // Modal View - List
-//                ModalView(isActive: $rootViewModel.isShownSearchValid, orientationShapeWidth: UIScreen.main.bounds.size.width, modalHeight: 300) {
+//                ModalView(orientationShapeWidth: UIScreen.main.bounds.size.width, modalHeight: 300) {
 //                    PlacesListView()
 //                }
 //                
-                ModalView(orientationShapeWidth: UIScreen.main.bounds.size.width, modalHeight: 300) {
+                ModalView(isShown: $rootViewModel.isShownAutocompleteModalView, orientationShapeWidth: UIScreen.main.bounds.size.width, modalHeight: 300) {
                     PlacesListView()
                 }
             }

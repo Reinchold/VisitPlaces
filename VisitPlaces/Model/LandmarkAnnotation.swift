@@ -12,11 +12,13 @@ final class LandmarkAnnotation: NSObject, MKAnnotation {
     var subtitle: String?
     var coordinate: CLLocationCoordinate2D
     var icon: UIImage
+    var placeID: String?
     
-    init(title: String?, subtitle: String?, coordinate: CLLocationCoordinate2D, icon: UIImage) {
+    init(title: String?, subtitle: String?, coordinate: CLLocationCoordinate2D, icon: UIImage, placeID: String?=nil) {
         self.title = title
         self.subtitle = subtitle
         self.coordinate = coordinate
         self.icon = icon
+        self.placeID = placeID
     }
 }

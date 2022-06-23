@@ -73,10 +73,10 @@ class API {
     
     func fetchRecommendations(from endpoint: Endpoint) -> AnyPublisher<[ResultPlaces], APIError> {
         Future<[ResultPlaces], APIError> { [unowned self] promise in
-            
             guard let url = endpoint.absoluteURL else {
                 return promise(.failure(.urlError(URLError(.unsupportedURL))))
             }
+            print("url: \(url)")
             
             self.fetchErr(url)
                 .tryMap { (model: GooglePlaces) -> [ResultPlaces] in

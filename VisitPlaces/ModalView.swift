@@ -37,6 +37,8 @@ struct ModalView<Content: View> : View {
 
     @Environment(\.colorScheme) var colorScheme
     
+    @Binding var isShown: Bool
+    
     @State var orientationShapeWidth: CGFloat
     
     @GestureState private var dragState = DragState.inactive
@@ -88,7 +90,7 @@ struct ModalView<Content: View> : View {
                         }
                         .padding(.top, spacer)
                     }
-                    .offset(y: rootViewModel.isShownAutocompleteModalView ? ((self.dragState.isDragging && dragState.translation.height >= 1) ? dragState.translation.height : 0) : modalHeight+spacer)
+                    .offset(y: isShown ? ((self.dragState.isDragging && dragState.translation.height >= 1) ? dragState.translation.height : 0) : modalHeight+spacer)
                     .animation(.interpolatingSpring(stiffness: 200, damping: 30.0, initialVelocity: 10.0))
                     .gesture(drag)
                 }

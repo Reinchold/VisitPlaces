@@ -16,6 +16,8 @@ final class RootViewModel: ObservableObject {
     
     var isNeedsMapUpdate = false
     
+    let placeClient = GMSPlacesClient()
+    
     // GoogleMaps markers
     var markers: [GMSMarker] = []
     
@@ -41,27 +43,25 @@ final class RootViewModel: ObservableObject {
     
     private var cancellableSet: Set<AnyCancellable> = []
     
+    // Reduce server requests
+    private var searchTypePublisher: AnyPublisher<String, Never> {
+        $searchType
+            .debounce(for: 0.5, scheduler: RunLoop.main)
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
+    
+    private var locationRadiusPublisher: AnyPublisher<Float, Never> {
+        $locationRadius
+            .debounce(for: 0.5, scheduler: RunLoop.main)
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
         
     init() {
         observePlaces()
     }
-    
-    func getLatLongFromAutocompletePrediction(prediction: GMSAutocompletePrediction) {
-        let placeClient = GMSPlacesClient()
-        placeClient.lookUpPlaceID(prediction.placeID) { (place, error) -> Void in
-            if let error = error {
-                 //show error
-                return
-            }
-
-            if let place = place {
-                self.cameraPosition = GMSCameraPosition(latitude: place.coordinate.latitude, longitude: place.coordinate.longitude, zoom: 15)
-            } else {
-                //show error
-            }
-        }
-    }
-    
+     
     private func observePlaces() {
         Publishers.CombineLatest3(searchTypePublisher, locationRadiusPublisher, $cameraPosition)
             .setFailureType(to: APIError.self)
@@ -105,23 +105,79 @@ final class RootViewModel: ObservableObject {
     }
 }
 
-// MARK: - AnyPublisher
+// MARK: - Places handle
 
 extension RootViewModel {
     
-    // Reduce server requests
-    private var searchTypePublisher: AnyPublisher<String, Never> {
-        $searchType
-            .debounce(for: 0.5, scheduler: RunLoop.main)
-            .removeDuplicates()
-            .eraseToAnyPublisher()
+    // MARK: - Autocomplete Prediction
+    func getLatLongFromAutocompletePrediction(prediction: GMSAutocompletePrediction) {
+        placeClient.lookUpPlaceID(prediction.placeID) { (place, error) -> Void in
+            if let error = error {
+                 //show error
+                return
+            }
+
+            if let place = place {
+                self.cameraPosition = GMSCameraPosition(latitude: place.coordinate.latitude, longitude: place.coordinate.longitude, zoom: 15)
+            } else {
+                //show error
+            }
+        }
     }
     
-    private var locationRadiusPublisher: AnyPublisher<Float, Never> {
-        $locationRadius
-            .debounce(for: 0.5, scheduler: RunLoop.main)
-            .removeDuplicates()
-            .eraseToAnyPublisher()
+    // https://developers.google.com/maps/documentation/places/ios-sdk/place-details
+    // MARK: - Place Details
+    func placeDetails(_ placeID: String?) {
+        guard let placeID = placeID else { return }
+        // A hotel in Saigon with an attribution.
+//        let placeID = "ChIJV4k8_9UodTERU5KXbkYpSYs"
+        // Specify the place data types to return.
+        let fields: GMSPlaceField = GMSPlaceField(rawValue: UInt(GMSPlaceField.name.rawValue) | UInt(GMSPlaceField.placeID.rawValue))
+
+        placeClient.fetchPlace(fromPlaceID: placeID, placeFields: fields, sessionToken: nil, callback: {
+            (place: GMSPlace?, error: Error?) in
+            if let error = error {
+                print("An error occurred: \(error.localizedDescription)")
+                return
+            }
+            if let place = place {
+                print("The selected place is: \(place.name)")
+            }
+        })
+    }
+    
+    // MARK: - Place Photos
+    func placePhotos(_ placeID: String?) {
+        guard let placeID = placeID else { return }
+        // Specify the place data types to return (in this case, just photos).
+        let fields: GMSPlaceField = GMSPlaceField(rawValue: UInt(GMSPlaceField.photos.rawValue))
+        
+        placeClient.fetchPlace(fromPlaceID: placeID, placeFields: fields, sessionToken: nil, callback: {
+            (place: GMSPlace?, error: Error?) in
+            if let error = error {
+                print("An error occurred: \(error.localizedDescription)")
+                return
+            }
+            if let place = place {
+                // Get the metadata for the first photo in the place photo metadata list.
+                let photoMetadata: GMSPlacePhotoMetadata = place.photos![0]
+                
+                // Call loadPlacePhoto to display the bitmap and attribution.
+                self.placeClient.loadPlacePhoto(photoMetadata, callback: { (photo, error) -> Void in
+                    if let error = error {
+                        // TODO: Handle the error.
+                        print("Error loading photo metadata: \(error.localizedDescription)")
+                        return
+                    } else {
+                        // Display the first image and its attributions.
+                        print("The selected image is: \(photo)")
+                        print("The selected attributedText is: \(photoMetadata.attributions)")
+//                        self.imageView?.image = photo;
+//                        self.lblText?.attributedText = photoMetadata.attributions;
+                    }
+                })
+            }
+        })
     }
     
 }

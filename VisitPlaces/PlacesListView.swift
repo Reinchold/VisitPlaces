@@ -26,6 +26,7 @@ struct PlacesListView: View {
                             // FIXME: - change the logic for adding text to the search field
                             rootViewModel.autocompletePredictions.removeAll()
                         }
+                        
                     }) {
                         VStack(alignment: .leading) {
                             Text(index.attributedPrimaryText.string)
