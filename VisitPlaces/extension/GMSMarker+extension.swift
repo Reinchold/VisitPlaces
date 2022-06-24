@@ -9,7 +9,7 @@ import GoogleMaps
 
 extension GMSMarker {
     
-    func setIconSize(scaledToSize newSize: CGSize) {
+    func setIconSize(scaledToSize newSize: CGSize=CGSize(width: 35, height: 35)) {
         UIGraphicsBeginImageContextWithOptions(newSize, false, 0.0)
         icon?.draw(in: CGRect(x: 0, y: 0, width: newSize.width, height: newSize.height))
         let newImage: UIImage = UIGraphicsGetImageFromCurrentImageContext()!

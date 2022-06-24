@@ -46,6 +46,7 @@ struct ModalView<Content: View> : View {
     var modalHeight: CGFloat = 0
     
     var content: () -> Content
+    var callback: (() -> Void)?
     
     var body: some View {
         
@@ -75,8 +76,8 @@ struct ModalView<Content: View> : View {
                         // Horizontal line
                         Rectangle()
                             .fill(Color.red.opacity(0.8))
-                            .frame(width: 100, height: 4, alignment: .center)
-                            .cornerRadius(5)
+                            .frame(width: 50, height: 4, alignment: .center)
+                            .cornerRadius(2)
                             .padding(.top, 18)
                         
                         VStack(spacing: 0) {
@@ -103,7 +104,7 @@ struct ModalView<Content: View> : View {
     private func onDragEnded(drag: DragGesture.Value) {
         let dragThreshold = modalHeight * (2/3)
         if drag.predictedEndTranslation.height > dragThreshold || drag.translation.height > dragThreshold {
-            rootViewModel.autocompletePredictions.removeAll()
+            callback?()
         }
     }
 }

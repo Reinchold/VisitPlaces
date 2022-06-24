@@ -27,6 +27,7 @@ enum Endpoint {
             return "geocode/json"
         }
     }
+    
     var absoluteURL: URL? {
         let queryURL = baseURL.appendingPathComponent(self.path())
         let components = URLComponents(url: queryURL, resolvingAgainstBaseURL: true)
@@ -53,8 +54,7 @@ enum Endpoint {
 }
 
 struct APIConstants {
-    
-    
+        
     static let jsonDecoder: JSONDecoder = {
         let jsonDecoder = JSONDecoder()
         jsonDecoder.keyDecodingStrategy = .convertFromSnakeCase
@@ -64,7 +64,6 @@ struct APIConstants {
         return jsonDecoder
     }()
 }
-
 
 class API {
     
@@ -165,9 +164,4 @@ class API {
             .eraseToAnyPublisher()
     }
     
-    
 }
-
-
-
-

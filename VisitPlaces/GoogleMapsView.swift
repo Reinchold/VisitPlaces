@@ -40,23 +40,17 @@ struct GoogleMapsView: UIViewRepresentable {
         guard rootViewModel.isNeedsMapUpdate else { return }
         rootViewModel.isNeedsMapUpdate = false
                 
-        /// Remove markers
+        // Remove all markers
         rootViewModel.markers.removeAll()
         mapView.clear()
         
-        // Places of interest
-        let newAnnotations = rootViewModel.resultPlaces.map {
-            LandmarkAnnotation(title: $0.name,
-                               subtitle: $0.vicinity,
-                               coordinate: $0.geometry.location.coordinate,
-                               icon: UIImage(named: rootViewModel.searchType)!,
-                               placeID: $0.placeId)  }
-        newAnnotations.forEach { self.markerCreator(mapView, annotation: $0) }
+        // Add markers for Places of interest
+        rootViewModel.resultPlaces.forEach {
+            self.markerCreator(mapView, resultPlaces: $0)
+        }
         
-        // Location of the found place
-        let location = rootViewModel.cameraPosition.target
-        let annotation = LandmarkAnnotation(title: "", subtitle: "The place that I was looking for", coordinate: location, icon: UIImage(named: "search")!)
-        markerCreator(mapView, annotation: annotation)
+        // Add a marker for location of the found place
+        markerCreator(mapView, resultPlaces: nil)
         
         // Change location if necessary
         moveCamera(mapView)
@@ -65,15 +59,20 @@ struct GoogleMapsView: UIViewRepresentable {
     }
     
     // MARK: - Marker Creator
-    func markerCreator(_ mapView: GMSMapView, annotation: LandmarkAnnotation) {
-        let marker = GMSMarker(position: annotation.coordinate)
-        marker.title = annotation.title
-        marker.snippet = annotation.subtitle
-        marker.userData = annotation.placeID
+    func markerCreator(_ mapView: GMSMapView, resultPlaces: ResultPlaces?) {
+        var location: CLLocationCoordinate2D
+        if let coordinate = resultPlaces?.geometry.location.coordinate {
+            location = coordinate
+        } else {
+            location = rootViewModel.cameraPosition.target
+        }
+        
+        let marker = GMSMarker(position: location)
         marker.appearAnimation = .pop
         marker.rotation = Double.random(in: -10...10)
-        marker.icon = annotation.icon
-        marker.setIconSize(scaledToSize: .init(width: 35, height: 35))
+        marker.icon = resultPlaces == nil ? UIImage(named: "search")! : UIImage(named: rootViewModel.searchType)!
+        marker.userData = resultPlaces
+        marker.setIconSize()
         rootViewModel.markers.append(marker)
         marker.map = mapView
     }
@@ -105,18 +104,15 @@ struct GoogleMapsView: UIViewRepresentable {
         }
         
         func mapView(_ mapView: GMSMapView, didTap marker: GMSMarker) -> Bool {
-            marker.setIconSize(scaledToSize: .init(width: 45, height: 45))
-            
-            parent.rootViewModel.placeDetails(marker.userData as? String)
-            parent.rootViewModel.placePhotos(marker.userData as? String)
-            
+            parent.rootViewModel.getPlaceDetails(marker)
             return false
         }
         
-        func mapView(_ mapView: GMSMapView, didCloseInfoWindowOf marker: GMSMarker) {
-            marker.setIconSize(scaledToSize: .init(width: 35, height: 35))
-            marker.tracksInfoWindowChanges = false
+        func mapView(_ mapView: GMSMapView, didTapAt coordinate: CLLocationCoordinate2D) {
+            parent.rootViewModel.gmsPlace = nil
+//            parent.rootViewModel.marker?.tracksInfoWindowChanges = false
         }
     }
 
 }
+

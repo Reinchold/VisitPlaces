@@ -62,14 +62,19 @@ struct ContentView: View {
                         .flatMap { ($0 as? UIWindowScene)?.windows ?? [] }
                         .first { $0.isKeyWindow }?.safeAreaInsets.top)
                     .padding()
-                
-                // Modal View - List
-//                ModalView(orientationShapeWidth: UIScreen.main.bounds.size.width, modalHeight: 300) {
-//                    PlacesListView()
-//                }
-//                
+  
+                // MARK: - Autocomplete Prediction
                 ModalView(isShown: $rootViewModel.isShownAutocompleteModalView, orientationShapeWidth: UIScreen.main.bounds.size.width, modalHeight: 300) {
                     PlacesListView()
+                } callback: {
+                    rootViewModel.autocompletePredictions.removeAll()
+                }
+                
+                // MARK: - Place Detail
+                ModalView(isShown: $rootViewModel.isShownPlaceDetail, orientationShapeWidth: UIScreen.main.bounds.size.width, modalHeight: 300) {
+                    PlacesDetailView()
+                } callback: {
+                    rootViewModel.gmsPlace = nil
                 }
             }
             .cornerRadius(self.rootViewModel.isShownSettingView ? 30 : 0)
