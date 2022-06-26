@@ -13,6 +13,8 @@ struct PlacesDetailView: View {
     @EnvironmentObject var rootViewModel: RootViewModel
     @State private var isDisclosed = false
     
+    var callback: ((UIImage) -> Void)?
+    
     func oHours() {
         let openingHours = rootViewModel.gmsPlace?.openingHours?.weekdayText
         //        openingHours.
@@ -99,6 +101,11 @@ struct PlacesDetailView: View {
                                     .clipped()
                                     .cornerRadius(10)
                                     .shadow(radius: 5)
+                                
+                            }.onTapGesture {
+                                withAnimation {
+                                    rootViewModel.zoomImage = (detail.photo)
+                                }
                             }
                         }
                     }

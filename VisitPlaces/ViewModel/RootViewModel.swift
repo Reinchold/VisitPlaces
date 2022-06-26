@@ -39,6 +39,7 @@ final class RootViewModel: ObservableObject {
     @Published var isShownSettingView = false
     @Published var isShownAutocompleteModalView = false
     @Published var isShownPlaceDetail = false
+    @Published var isShownPhotoZoom = false
     
     @Published var keyboardHeight: CGFloat = .zero
     
@@ -49,6 +50,7 @@ final class RootViewModel: ObservableObject {
 //    @Published var resultPlaceMarkerSelected: ResultPlaces?
     @Published var gmsPlace: GMSPlace?
     @Published var placePhotos: [PlacePhotos] = []
+    @Published var zoomImage: UIImage?
     
     @Published var articlesError: APIError?
     
@@ -74,6 +76,11 @@ final class RootViewModel: ObservableObject {
     }
      
     private func observePlaces() {
+        $zoomImage
+            .map { $0 != nil }
+            .assign(to: \.isShownPhotoZoom, on: self)
+            .store(in: &cancellableSet)
+        
         $gmsPlace
             .map { $0 != nil }
             .sink(receiveValue: { [unowned self] state in

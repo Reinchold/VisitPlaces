@@ -64,30 +64,36 @@ struct ModalView<Content: View> : View {
                     Spacer()
                     
                     ZStack(alignment: .top) {
-                        
-                        // Header + body
-                        Rectangle()
-                            .fill(colorScheme == .dark ? Color.black : Color.white)
-                            .frame(width: orientationShapeWidth,
-                                   height: modalHeight+spacer)
-                            .cornerRadius(10, corners: [.topLeft, .topRight])
-                            .shadow(radius: 5)
-                        
-                        // Horizontal line
-                        Rectangle()
-                            .fill(Color.red.opacity(0.8))
-                            .frame(width: 50, height: 4, alignment: .center)
-                            .cornerRadius(2)
-                            .padding(.top, 18)
-                        
+                     
                         VStack(spacing: 0) {
+                            
+                            // Header
+                            ZStack(alignment: .center) {
+                                
+                                // Header - body
+                                Rectangle()
+                                    .fill(colorScheme == .dark ? Color.black : Color.white)
+                                    .frame(width: orientationShapeWidth,
+                                           height: spacer)
+                                    .cornerRadius(10, corners: [.topLeft, .topRight])
+                                    .shadow(radius: 5)
+                                
+                                // Horizontal line
+                                Rectangle()
+                                    .fill(Color.red.opacity(0.8))
+                                    .frame(width: 50, height: 4, alignment: .center)
+                                    .cornerRadius(2)
+                            }
+                            
                             Divider()
                                 .background(.gray)
                                 .frame(width: orientationShapeWidth)
                             
+                            // Content
                             content()
-                                .frame(width: orientationShapeWidth, height: modalHeight)
+                                .frame(width: orientationShapeWidth, height: modalHeight-spacer)
                                 .clipped()
+                                .background(.white)
                         }
                         .padding(.top, spacer)
                     }

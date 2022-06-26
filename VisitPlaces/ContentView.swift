@@ -12,6 +12,8 @@ struct ContentView: View {
     
     @EnvironmentObject var rootViewModel: RootViewModel
     
+    @State var scale: CGFloat = 1.0
+    
     var body: some View {
         
         ZStack(alignment: .bottom) {
@@ -23,20 +25,12 @@ struct ContentView: View {
                 }
                 .padding(.top, 25)
                 .padding(.horizontal, 20)
-                
+
                 Spacer(minLength: 0)
             }
-            .padding(.top, UIApplication
-                .shared
-                .connectedScenes
-                .flatMap { ($0 as? UIWindowScene)?.windows ?? [] }
-                .first { $0.isKeyWindow }?.safeAreaInsets.top)
-            .padding(.bottom, UIApplication
-                .shared
-                .connectedScenes
-                .flatMap { ($0 as? UIWindowScene)?.windows ?? [] }
-                .first { $0.isKeyWindow }?.safeAreaInsets.bottom)
-            
+            .padding(.top, UIApplication.shared.safeAreaInsets?.top)
+            .padding(.bottom, UIApplication.shared.safeAreaInsets?.bottom)
+
             // MainView (Map)
             ZStack(alignment: .top) {
                 PlacesFetcher()
@@ -56,11 +50,7 @@ struct ContentView: View {
                 
                 // Search Field
                 SearchField()
-                    .padding(.top, UIApplication
-                        .shared
-                        .connectedScenes
-                        .flatMap { ($0 as? UIWindowScene)?.windows ?? [] }
-                        .first { $0.isKeyWindow }?.safeAreaInsets.top)
+                    .padding(.top, UIApplication.shared.safeAreaInsets?.top)
                     .padding()
   
                 // MARK: - Autocomplete Prediction
@@ -69,13 +59,30 @@ struct ContentView: View {
                 } callback: {
                     rootViewModel.autocompletePredictions.removeAll()
                 }
-                
+
                 // MARK: - Place Detail
                 ModalView(isShown: $rootViewModel.isShownPlaceDetail, orientationShapeWidth: UIScreen.main.bounds.size.width, modalHeight: 300) {
                     PlacesDetailView()
                 } callback: {
                     rootViewModel.gmsPlace = nil
                 }
+                
+                // MARK: - Photo zoomer
+                let modalHeight: CGFloat = {
+                    let screenHeight = UIScreen.main.bounds.size.height
+                    let safeAreaTop = UIApplication.shared.safeAreaInsets?.top ?? 0
+
+                    return screenHeight-safeAreaTop
+                }()
+                
+                ModalView(isShown: $rootViewModel.isShownPhotoZoom,
+                           orientationShapeWidth: UIScreen.main.bounds.size.width,
+                           modalHeight: modalHeight) {
+                                        PhotoZoom()
+                } callback: {
+                    rootViewModel.zoomImage = nil
+                }
+                
             }
             .cornerRadius(self.rootViewModel.isShownSettingView ? 30 : 0)
             .scaleEffect(self.rootViewModel.isShownSettingView ? 0.9 : 1)
