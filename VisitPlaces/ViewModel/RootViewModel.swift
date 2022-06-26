@@ -183,9 +183,11 @@ extension RootViewModel {
                 return
             }
             if let place = place {
-                print("💔 The selected formattedAddress is: \(place.openingHours)")
+                print("💔 The selected formattedAddress is: \(place.openingHours?.periods)")
+                if let openingHours: [GMSPeriod] = place.openingHours?.periods {
+                    openingHours.map { print("💔 The selected formattedAddress is: \($0.openEvent.time)")}
+                }
                 self.gmsPlace = place
-                
                 guard let photoMetadata = place.photos else { return }
                 self.getPlacePhotos(photoMetadatas: photoMetadata)
             }

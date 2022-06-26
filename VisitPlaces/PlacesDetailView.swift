@@ -61,11 +61,15 @@ struct PlacesDetailView: View {
                             .frame(width: 10, height: 10)
                     }
                 
-                    if let openingHours: [String] = rootViewModel.gmsPlace?.openingHours?.weekdayText {
+                    if let openingHours: [GMSPeriod] = rootViewModel.gmsPlace?.openingHours?.periods {
                         GroupBox {
                             VStack(alignment: .leading) {
                                 ForEach(openingHours, id: \.self) { text in
-                                    Text(text)
+                                    HStack {
+                                        Text(Calendar.current.weekdaySymbols[Int(text.openEvent.day.rawValue) - 1])
+                                        Spacer()
+                                        Text(getTimePeriodString(from: text))
+                                    }
                                 }
                             }
                         }
@@ -118,4 +122,15 @@ struct PlacesDetailView: View {
             .padding(.vertical, 20)
         }
     }
+    
+    func getTimePeriodString(from period: GMSPeriod) -> String {
+        let startTime = period.openEvent.time
+        
+        var string = "\(startTime)"
+        if let endTime = period.closeEvent?.time {
+            string += " - \(endTime)"
+        }
+        return string
+    }
+    
 }
