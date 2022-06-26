@@ -53,11 +53,11 @@ struct PhotoZoom: View {
             Button(action: { rootViewModel.zoomImage = nil }) {
                 ZStack {
                     Image(systemName: "circle.fill")
-                        .foregroundColor(Color(UIColor.secondarySystemFill))
+                        .foregroundColor(Color.secondary)
                         .font(.system(size: 31))
                     
                     Image(systemName: "xmark")
-                        .foregroundColor(Color.secondary)
+                        .foregroundColor(Color.white)
                         .font(.system(size: 15, weight: .bold))
                 }
             }
@@ -66,7 +66,7 @@ struct PhotoZoom: View {
             .position(x: geometry.size.width * 0.9,
                       y: geometry.size.height - (geometry.size.height * 0.9))
         }
-        .background(Color.gray)
+        .background(Color.primary)
         .edgesIgnoringSafeArea(.all)
         
     }
