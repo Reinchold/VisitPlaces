@@ -78,7 +78,7 @@ struct ContentView: View {
                 ModalView(isShown: $rootViewModel.isShownPhotoZoom,
                            orientationShapeWidth: UIScreen.main.bounds.size.width,
                            modalHeight: modalHeight) {
-                                        PhotoZoom()
+                    PhotoZoom()
                 } callback: {
                     rootViewModel.zoomImage = nil
                 }
