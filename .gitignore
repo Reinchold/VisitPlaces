@@ -82,3 +82,5 @@ fastlane/test_output
 iOSInjectionProject/
 
 .DS_Store
+
+VisitPlaces.xcodeproj/project.pbxproj

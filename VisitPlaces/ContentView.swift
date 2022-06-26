@@ -52,7 +52,8 @@ struct ContentView: View {
                 SearchField()
                     .padding(.top, UIApplication.shared.safeAreaInsets?.top)
                     .padding()
-  
+                    .ignoresSafeArea(.keyboard)
+                
                 // MARK: - Autocomplete Prediction
                 ModalView(isShown: $rootViewModel.isShownAutocompleteModalView, orientationShapeWidth: UIScreen.main.bounds.size.width, modalHeight: 300) {
                     PlacesListView()
@@ -66,23 +67,12 @@ struct ContentView: View {
                 } callback: {
                     rootViewModel.gmsPlace = nil
                 }
-                
-                // MARK: - Photo zoomer
-                let modalHeight: CGFloat = {
-                    let screenHeight = UIScreen.main.bounds.size.height
-                    let safeAreaTop = UIApplication.shared.safeAreaInsets?.top ?? 0
 
-                    return screenHeight-safeAreaTop
-                }()
-                
-                ModalView(isShown: $rootViewModel.isShownPhotoZoom,
-                           orientationShapeWidth: UIScreen.main.bounds.size.width,
-                           modalHeight: modalHeight) {
+                // MARK: - Photo zoomer
+                if rootViewModel.isShownPhotoZoom {
                     PhotoZoom()
-                } callback: {
-                    rootViewModel.zoomImage = nil
                 }
-                
+
             }
             .cornerRadius(self.rootViewModel.isShownSettingView ? 30 : 0)
             .scaleEffect(self.rootViewModel.isShownSettingView ? 0.9 : 1)

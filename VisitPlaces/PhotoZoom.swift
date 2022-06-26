@@ -49,9 +49,26 @@ struct PhotoZoom: View {
                 .offset(offset)
                 .gesture(dragGesture)
                 .gesture(magnificationGesture)
+            
+            Button(action: { rootViewModel.zoomImage = nil }) {
+                ZStack {
+                    Image(systemName: "circle.fill")
+                        .foregroundColor(Color(UIColor.secondarySystemFill))
+                        .font(.system(size: 31))
+                    
+                    Image(systemName: "xmark")
+                        .foregroundColor(Color.secondary)
+                        .font(.system(size: 15, weight: .bold))
+                }
+            }
+            .foregroundColor(.white)
+            .frame(width: 35, height: 35)
+            .position(x: geometry.size.width * 0.9,
+                      y: geometry.size.height - (geometry.size.height * 0.9))
         }
-        .background(Color.black)
+        .background(Color.gray)
         .edgesIgnoringSafeArea(.all)
+        
     }
     
     private func fixOffsetAndScale(geometry: GeometryProxy) {

@@ -18,15 +18,5 @@ extension UIApplication {
         
         return keyWindow?.safeAreaInsets
     }
-    
-    /*
-     var safeAreaInsets: UIEdgeInsets {
-         UIApplication
-             .shared
-             .connectedScenes
-             .flatMap { ($0 as? UIWindowScene)?.windows ?? [] }
-             .first { $0.isKeyWindow }?
-             .safeAreaInsets ?? .zero//.top ?? .zero
-     }
-     */
+
 }
