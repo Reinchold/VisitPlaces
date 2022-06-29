@@ -58,14 +58,18 @@ struct ContentView: View {
                 ModalView(isShown: $rootViewModel.isShownAutocompleteModalView, orientationShapeWidth: UIScreen.main.bounds.size.width, modalHeight: 300) {
                     PlacesListView()
                 } callback: {
-                    rootViewModel.autocompletePredictions.removeAll()
+                    withAnimation {
+                        rootViewModel.autocompletePredictions.removeAll()
+                    }
                 }
 
                 // MARK: - Place Detail
                 ModalView(isShown: $rootViewModel.isShownPlaceDetail, orientationShapeWidth: UIScreen.main.bounds.size.width, modalHeight: 300) {
                     PlacesDetailView()
                 } callback: {
-                    rootViewModel.gmsPlace = nil
+                    withAnimation {
+                        rootViewModel.gmsPlace = nil
+                    }
                 }
 
                 // MARK: - Photo zoomer

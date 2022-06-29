@@ -11,14 +11,10 @@ import GooglePlaces
 struct PlacesDetailView: View {
     
     @EnvironmentObject var rootViewModel: RootViewModel
+    
     @State private var isDisclosed = false
     
     var callback: ((UIImage) -> Void)?
-    
-    func oHours() {
-        let openingHours = rootViewModel.gmsPlace?.openingHours?.weekdayText
-        //        openingHours.
-    }
     
     var body: some View {
         
@@ -77,8 +73,6 @@ struct PlacesDetailView: View {
                         .frame(height: isDisclosed ? nil : 0, alignment: .top)
                         .clipped()                        
                     }
-                    
-                    
                 }
                 .frame(maxWidth: .infinity)
                 .background(.thinMaterial)
@@ -93,31 +87,14 @@ struct PlacesDetailView: View {
                 // Preview images
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(alignment: .center, spacing: 20) {
-                        
-                        let photosSorted: [PlacePhotos] = self.rootViewModel.placePhotos.sorted(by: { $0.id < $1.id })
-                        
-                        ForEach(photosSorted, id: \.self) { detail in
-                            VStack {
-                                Image(uiImage: detail.photo)
-                                    .resizable()
-                                    .scaledToFill()
-                                    .frame(width: 170, height: 170)
-                                    .clipped()
-                                    .cornerRadius(10)
-                                    .shadow(radius: 5)
-                                
-                            }.onTapGesture {
-                                withAnimation {
-                                    rootViewModel.zoomImage = (detail.photo)
-                                }
+                        ForEach(rootViewModel.placePhotos, id: \.self) { detail in
+                            ImageSkeleton(image: detail.photo) { image in
+                                rootViewModel.zoomImage = (image)
                             }
                         }
                     }
                     .padding(.horizontal, 15)
                 }
-                
-                Spacer()
-                
             }
             .padding(.vertical, 20)
         }

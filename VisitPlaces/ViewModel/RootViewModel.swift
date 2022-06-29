@@ -51,6 +51,7 @@ final class RootViewModel: ObservableObject {
     @Published var gmsPlace: GMSPlace?
     @Published var placePhotos: [PlacePhotos] = []
     @Published var zoomImage: UIImage?
+    private let imageCache = NSCache<NSString, NSData>()
     
     @Published var articlesError: APIError?
     
@@ -183,10 +184,6 @@ extension RootViewModel {
                 return
             }
             if let place = place {
-                print("💔 The selected formattedAddress is: \(place.openingHours?.periods)")
-                if let openingHours: [GMSPeriod] = place.openingHours?.periods {
-                    openingHours.map { print("💔 The selected formattedAddress is: \($0.openEvent.time)")}
-                }
                 self.gmsPlace = place
                 guard let photoMetadata = place.photos else { return }
                 self.getPlacePhotos(photoMetadatas: photoMetadata)
@@ -195,24 +192,43 @@ extension RootViewModel {
     }
     
     private func getPlacePhotos(photoMetadatas: [GMSPlacePhotoMetadata]) {
-        for (index, photoMetadata) in photoMetadatas.enumerated() {
-            // Call loadPlacePhoto to display the bitmap and attribution.
-            self.placeClient.loadPlacePhoto(photoMetadata, callback: { (photo, error) -> Void in
-
-                if let error = error {
-                    // TODO: Handle the error.
-                    print("Error loading photo metadata: \(error.localizedDescription)")
-                    return
+        DispatchQueue.global(qos: .userInitiated).async {
+            var photos: [PlacePhotos] = []
+            let group = DispatchGroup()
+            
+            for (index, photoMetadata) in photoMetadatas.enumerated() {
+                group.enter()
+                
+                // Call loadPlacePhoto to display the bitmap and attribution.
+                self.placeClient.loadPlacePhoto(photoMetadata, callback: { (image, error) -> Void in
+                    
+                    if let error = error {
+                        // TODO: Handle the error.
+                        print("Error loading photo metadata: \(error.localizedDescription)")
+                    }
+                    
+                    if let image = image {
+                        photos.append(PlacePhotos(id: index, photo: image, attributedString: photoMetadata.attributions))
+                    }
+                    group.leave()
+                })
+            }
+            
+            group.wait()
+            
+            group.notify(queue: .main) {
+                
+                let photosSorted = photos.sorted(by: { $0.id < $1.id })
+                
+                for (n, obj) in photosSorted.enumerated() {
+                    let sec = Double(n) * 0.5
+                    DispatchQueue.main.asyncAfter(deadline: .now() + sec) {
+                        self.placePhotos.append(obj)
+                    }
                 }
-                guard let photo = photo else { return }
-                    // Display the first image and its attributions.
-//                    print("The selected image is: \(photo)")
-//                    print("The selected attributedText is: \(photoMetadata.attributions)")
-//                  self.lblText?.attributedText = photoMetadata.attributions
-                self.placePhotos.append(PlacePhotos(id: index, photo: photo, attributedString: photoMetadata.attributions))
-            })
+            }
         }
     }
-    
+
 }
 
