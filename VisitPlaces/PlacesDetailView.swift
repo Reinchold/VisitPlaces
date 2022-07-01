@@ -12,10 +12,6 @@ struct PlacesDetailView: View {
     
     @EnvironmentObject var rootViewModel: RootViewModel
     
-    @State private var isDisclosed = false
-    
-    var callback: ((UIImage) -> Void)?
-    
     var body: some View {
         
         let isOpenNow: Bool = {
@@ -45,13 +41,12 @@ struct PlacesDetailView: View {
                 
                 // Opening hours with expand animation
                 VStack(alignment: .leading, spacing: 0) {
-//                    Text(openNow + (isDisclosed ? "" : "")).padding(5)
                     HStack {
                         Text(isOpenNow ? "Geöffnet" : "Geschlossen")
                             .foregroundColor(isOpenNow ? .green : .red)
                             .padding(5)
 
-                        Image(systemName: isDisclosed ? "chevron.up" : "chevron.down")
+                        Image(systemName: rootViewModel.isOpeningHoursDisclosed ? "chevron.up" : "chevron.down")
                             .resizable()
                             .scaledToFit()
                             .frame(width: 10, height: 10)
@@ -70,7 +65,7 @@ struct PlacesDetailView: View {
                             }
                         }
                         .padding()
-                        .frame(height: isDisclosed ? nil : 0, alignment: .top)
+                        .frame(height: rootViewModel.isOpeningHoursDisclosed ? nil : 0, alignment: .top)
                         .clipped()                        
                     }
                 }
@@ -80,7 +75,7 @@ struct PlacesDetailView: View {
                 .padding()
                 .onTapGesture {
                     withAnimation {
-                        isDisclosed.toggle()
+                        rootViewModel.isOpeningHoursDisclosed.toggle()
                     }
                 }
                 
@@ -89,7 +84,9 @@ struct PlacesDetailView: View {
                     HStack(alignment: .center, spacing: 20) {
                         ForEach(rootViewModel.placePhotos, id: \.self) { detail in
                             ImageSkeleton(image: detail.photo) { image in
-                                rootViewModel.zoomImage = (image)
+                                withAnimation {
+                                    rootViewModel.zoomImage = image
+                                }
                             }
                         }
                     }
@@ -98,8 +95,10 @@ struct PlacesDetailView: View {
             }
             .padding(.vertical, 20)
         }
+        .frame(maxHeight: rootViewModel.gmsPlace == nil ? .zero : .infinity)
     }
     
+    // Convert TimePeriod to string
     func getTimePeriodString(from period: GMSPeriod) -> String {
         let startTime = period.openEvent.time
         

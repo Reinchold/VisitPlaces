@@ -67,16 +67,16 @@ struct ContentView: View {
                 ModalView(isShown: $rootViewModel.isShownPlaceDetail, orientationShapeWidth: UIScreen.main.bounds.size.width, modalHeight: 300) {
                     PlacesDetailView()
                 } callback: {
-                    withAnimation {
                         rootViewModel.gmsPlace = nil
-                    }
                 }
 
                 // MARK: - Photo zoomer
-                if rootViewModel.isShownPhotoZoom {
-                    PhotoZoom()
+                ZStack {
+                    if rootViewModel.isShownPhotoZoom {
+                        PhotoZoom()
+                    }
                 }
-
+                .transition(.slide)
             }
             .cornerRadius(self.rootViewModel.isShownSettingView ? 30 : 0)
             .scaleEffect(self.rootViewModel.isShownSettingView ? 0.9 : 1)

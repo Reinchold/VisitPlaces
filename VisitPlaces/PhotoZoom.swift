@@ -50,7 +50,11 @@ struct PhotoZoom: View {
                 .gesture(dragGesture)
                 .gesture(magnificationGesture)
             
-            Button(action: { rootViewModel.zoomImage = nil }) {
+            Button(action: {
+                withAnimation {
+                    rootViewModel.zoomImage = nil
+                }
+            }) {
                 ZStack {
                     Image(systemName: "circle.fill")
                         .foregroundColor(Color.secondary)

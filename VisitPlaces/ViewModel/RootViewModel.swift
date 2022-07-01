@@ -8,6 +8,7 @@
 import Combine
 import GooglePlaces
 import GoogleMaps
+import SwiftUI
 
 struct PlacePhotos: Identifiable, Hashable {
     let id: Int
@@ -26,7 +27,7 @@ final class RootViewModel: ObservableObject {
     
     var isNeedsMapUpdate = false
     
-    let placeClient = GMSPlacesClient()
+    private let placeClient = GMSPlacesClient()
     
     // input
     @Published var searchTextField: String = ""
@@ -34,12 +35,13 @@ final class RootViewModel: ObservableObject {
 
     @Published var cameraPosition: GMSCameraPosition = GMSCameraPosition.cameraPosition
     @Published var searchType = "bar"
-    @Published var locationRadius: Float = 200.0
+    @Published var locationRadius: Float = 300.0
     
     @Published var isShownSettingView = false
     @Published var isShownAutocompleteModalView = false
     @Published var isShownPlaceDetail = false
     @Published var isShownPhotoZoom = false
+    var isOpeningHoursDisclosed = false
     
     @Published var keyboardHeight: CGFloat = .zero
     
@@ -90,6 +92,7 @@ final class RootViewModel: ObservableObject {
                 } else {
                     self.marker?.setIconSize()
                 }
+                self.isOpeningHoursDisclosed = false
                 self.isShownPlaceDetail = state
             })
             .store(in: &cancellableSet)
@@ -161,6 +164,7 @@ extension RootViewModel {
     // Details - https://developers.google.com/maps/documentation/places/ios-sdk/place-details
     // Fields - https://developers.google.com/maps/documentation/places/ios-sdk/place-data-fields
     func getPlaceDetails(_ marker: GMSMarker) {
+        guard self.marker != marker else { return }
         guard let markerPlaces = marker.userData as? ResultPlaces else { return }
         if self.marker != nil {
             self.placePhotos.removeAll()
@@ -186,7 +190,9 @@ extension RootViewModel {
             if let place = place {
                 self.gmsPlace = place
                 guard let photoMetadata = place.photos else { return }
-                self.getPlacePhotos(photoMetadatas: photoMetadata)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                    self.getPlacePhotos(photoMetadatas: photoMetadata)
+                }
             }
         })
     }
@@ -217,11 +223,10 @@ extension RootViewModel {
             group.wait()
             
             group.notify(queue: .main) {
-                
                 let photosSorted = photos.sorted(by: { $0.id < $1.id })
                 
                 for (n, obj) in photosSorted.enumerated() {
-                    let sec = Double(n) * 0.5
+                    let sec = Double(n) * 0.1
                     DispatchQueue.main.asyncAfter(deadline: .now() + sec) {
                         self.placePhotos.append(obj)
                     }
