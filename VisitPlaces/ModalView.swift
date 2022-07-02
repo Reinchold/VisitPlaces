@@ -8,6 +8,11 @@
 import SwiftUI
 import Combine
 
+enum ModalScreenPosition {
+    case top
+    case middle
+}
+
 enum DragState {
     case inactive
     case dragging(translation: CGSize)
@@ -34,21 +39,29 @@ enum DragState {
 struct ModalView<Content: View> : View {
     
     @EnvironmentObject var rootViewModel: RootViewModel
-
     @Environment(\.colorScheme) var colorScheme
-    
-    @Binding var isShown: Bool
-    
-    @State var orientationShapeWidth: CGFloat
-    
     @GestureState private var dragState = DragState.inactive
-    
-    var modalHeight: CGFloat = 0
+    @Binding var isShown: Bool
+    @State var offset: CGFloat = 0
+    @State var position: ModalScreenPosition = .middle
+    var midHeight: CGFloat
+    var width: CGFloat
+    var isFullScreenable = false
     
     var content: () -> Content
     var callback: (() -> Void)?
     
+    // UIScreen height
+    private var maxHeight: CGFloat {
+        let screenHeight = UIScreen.main.bounds.size.height
+        let safeAreaTop = UIApplication.shared.safeAreaInsets?.top ?? 0
+        
+        return screenHeight-safeAreaTop
+    }
+    
     var body: some View {
+        
+        let spacer: CGFloat = 40
         
         let drag = DragGesture()
             .updating($dragState) { drag, state, transaction in
@@ -56,7 +69,15 @@ struct ModalView<Content: View> : View {
             }
             .onEnded(onDragEnded)
         
-        let spacer: CGFloat = 40
+        var offsetCondition: CGFloat {
+            guard isShown else { return maxHeight }
+            
+            if dragState.isDragging {
+                return dragState.translation.height + offset
+            } else {
+                return offset
+            }
+        }
         
         return Group {
             ZStack {
@@ -64,7 +85,7 @@ struct ModalView<Content: View> : View {
                     Spacer()
                     
                     ZStack(alignment: .top) {
-                     
+                        
                         VStack(spacing: 0) {
                             
                             // Header
@@ -73,7 +94,7 @@ struct ModalView<Content: View> : View {
                                 // Header - body
                                 Rectangle()
                                     .fill(colorScheme == .dark ? Color.black : Color.white)
-                                    .frame(width: orientationShapeWidth,
+                                    .frame(width: width,
                                            height: spacer)
                                     .cornerRadius(10, corners: [.topLeft, .topRight])
                                     .shadow(radius: 5)
@@ -87,31 +108,66 @@ struct ModalView<Content: View> : View {
                             
                             Divider()
                                 .background(.gray)
-                                .frame(width: orientationShapeWidth)
+                                .frame(width: width)
                             
-                            // Content
-                            content()
-                                .frame(width: orientationShapeWidth, height: modalHeight-spacer)
-                                .clipped()
-                                .background(.white)
+                            ZStack {
+                                // Content
+                                content()
+                                    .padding(.bottom, offset)
+                                    .frame(width: width, height: maxHeight-spacer)
+                                    .clipped()
+                                    .background(.white)
+                            }
                         }
                         .padding(.top, spacer)
                     }
-                    .offset(y: isShown ? ((self.dragState.isDragging && dragState.translation.height >= 1) ? dragState.translation.height : 0) : modalHeight+spacer)
+                    .offset(y: offsetCondition)
                     .animation(.interpolatingSpring(stiffness: 200, damping: 30.0, initialVelocity: 10.0))
                     .gesture(drag)
                 }
             }
             .offset(y: -rootViewModel.keyboardHeight)
             .onReceive(Publishers.keyboardHeight) { rootViewModel.keyboardHeight = $0 }
+            .onAppear {
+                withAnimation {
+                    offset = maxHeight-midHeight
+                }
+            }
         }
     }
     
+    // MARK: - Calculate end of dragging
     private func onDragEnded(drag: DragGesture.Value) {
-        let dragThreshold = modalHeight * (2/3)
-        if drag.predictedEndTranslation.height > dragThreshold || drag.translation.height > dragThreshold {
-            callback?()
+        if position == .top {
+            // calculate in half the screen.
+            let startMiddleThreshold = maxHeight * (1/6)
+            let endMiddleThreshold = maxHeight * (4/6)
+            let middleRange: ClosedRange<CGFloat> = startMiddleThreshold...endMiddleThreshold
+            
+            // calculate to close the screen.
+            let startCloseThreshold = maxHeight * (5/6)
+            let endCloseThreshold = maxHeight
+            let closeRange: ClosedRange<CGFloat> = startCloseThreshold...endCloseThreshold
+            
+            if middleRange ~= drag.predictedEndTranslation.height {
+                position = .middle
+                offset = maxHeight-midHeight
+            } else if closeRange ~= drag.predictedEndTranslation.height {
+                position = .middle
+                offset = maxHeight-midHeight
+                callback?()
+            }
+        } else if position == .middle {
+            let dragThreshold = midHeight * (2/3)
+            if drag.predictedEndTranslation.height < 0 || drag.translation.height < 0 {
+                offset = 0
+                position = .top
+            } else if drag.predictedEndTranslation.height > dragThreshold || drag.translation.height > dragThreshold {
+                position = .middle
+                callback?()
+            }
         }
     }
+    
 }
 

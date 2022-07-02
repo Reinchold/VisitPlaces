@@ -41,7 +41,7 @@ final class RootViewModel: ObservableObject {
     @Published var isShownAutocompleteModalView = false
     @Published var isShownPlaceDetail = false
     @Published var isShownPhotoZoom = false
-    var isOpeningHoursDisclosed = false
+    @Published var isOpeningHoursDisclosed = false
     
     @Published var keyboardHeight: CGFloat = .zero
     
@@ -91,6 +91,7 @@ final class RootViewModel: ObservableObject {
                     self.marker?.setIconSize(scaledToSize: .init(width: 45, height: 45))
                 } else {
                     self.marker?.setIconSize()
+                    self.marker = nil
                 }
                 self.isOpeningHoursDisclosed = false
                 self.isShownPlaceDetail = state

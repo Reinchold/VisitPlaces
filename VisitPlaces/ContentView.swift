@@ -16,7 +16,7 @@ struct ContentView: View {
     
     var body: some View {
         
-        ZStack(alignment: .bottom) {
+        GeometryReader { geometry in
             // Left bar menu
             HStack {
                 VStack(alignment: .leading, spacing: 12) {
@@ -50,24 +50,23 @@ struct ContentView: View {
                 
                 // Search Field
                 SearchField()
+                    .frame(width: geometry.size.width*0.9)
                     .padding(.top, UIApplication.shared.safeAreaInsets?.top)
-                    .padding()
-                    .ignoresSafeArea(.keyboard)
                 
                 // MARK: - Autocomplete Prediction
-                ModalView(isShown: $rootViewModel.isShownAutocompleteModalView, orientationShapeWidth: UIScreen.main.bounds.size.width, modalHeight: 300) {
+                ModalView(isShown: $rootViewModel.isShownAutocompleteModalView, midHeight: 300, width: geometry.size.width) {
                     PlacesListView()
                 } callback: {
                     withAnimation {
                         rootViewModel.autocompletePredictions.removeAll()
                     }
                 }
-
+                
                 // MARK: - Place Detail
-                ModalView(isShown: $rootViewModel.isShownPlaceDetail, orientationShapeWidth: UIScreen.main.bounds.size.width, modalHeight: 300) {
+                ModalView(isShown: $rootViewModel.isShownPlaceDetail, midHeight: 300, width: geometry.size.width, isFullScreenable: true) {
                     PlacesDetailView()
                 } callback: {
-                        rootViewModel.gmsPlace = nil
+                    rootViewModel.gmsPlace = nil
                 }
 
                 // MARK: - Photo zoomer
