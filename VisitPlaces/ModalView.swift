@@ -69,11 +69,13 @@ struct ModalView<Content: View> : View {
             }
             .onEnded(onDragEnded)
         
-        var offsetCondition: CGFloat {
+        var offsetCalculation: CGFloat {
             guard isShown else { return maxHeight }
             
             if dragState.isDragging {
-                return dragState.translation.height + offset
+                let translatedOffset = dragState.translation.height + offset
+                let positiveFloat = translatedOffset.sign == .plus ? translatedOffset : .zero
+                return positiveFloat
             } else {
                 return offset
             }
@@ -121,7 +123,7 @@ struct ModalView<Content: View> : View {
                         }
                         .padding(.top, spacer)
                     }
-                    .offset(y: offsetCondition)
+                    .offset(y: offsetCalculation)
                     .animation(.interpolatingSpring(stiffness: 200, damping: 30.0, initialVelocity: 10.0))
                     .gesture(drag)
                 }
