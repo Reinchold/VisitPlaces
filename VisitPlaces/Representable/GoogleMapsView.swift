@@ -25,15 +25,20 @@ struct GoogleMapsView: UIViewRepresentable {
         let camera = rootViewModel.cameraPosition
         let mapView = GMSMapView(frame: .zero, camera: camera)
         mapView.delegate = context.coordinator
+        setStyleViaMode(mapView)
+        rootViewModel.mapView = mapView
+        return mapView
+    }
+    
+    private func setStyleViaMode(_ mapView: GMSMapView) {
+        let style = UITraitCollection.current.userInterfaceStyle == .light ? "style-light" : "style-dark"
         
         // Map style
         do {
-            mapView.mapStyle = try GMSMapStyle(named: "style")
+            mapView.mapStyle = try GMSMapStyle(named: style)
         } catch {
             NSLog("One or more of the map styles failed to load. \(error)")
         }
-
-        return mapView
     }
     
     func updateUIView(_ mapView: GMSMapView, context: Context) {

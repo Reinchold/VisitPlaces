@@ -57,11 +57,11 @@ struct PhotoZoom: View {
             }) {
                 ZStack {
                     Image(systemName: "circle.fill")
-                        .foregroundColor(Color.secondary)
+                        .foregroundColor(VPColors.subTitle)
                         .font(.system(size: 31))
                     
                     Image(systemName: "xmark")
-                        .foregroundColor(Color.white)
+                        .foregroundColor(VPColors.systemBackground)
                         .font(.system(size: 15, weight: .bold))
                 }
             }
@@ -70,7 +70,7 @@ struct PhotoZoom: View {
             .position(x: geometry.size.width * 0.9,
                       y: geometry.size.height - (geometry.size.height * 0.9))
         }
-        .background(Color.primary)
+        .background(VPColors.systemBackground)
         .edgesIgnoringSafeArea(.all)
         
     }

@@ -30,11 +30,11 @@ struct PlacesListView: View {
                     }) {
                         VStack(alignment: .leading) {
                             Text(index.attributedPrimaryText.string)
-                                .font(.title3)
-                                .foregroundColor(.red)
+                                .font(VPFonts.SFProTextRegular16)
+                                .foregroundColor(VPColors.title)
                             Text(index.attributedSecondaryText?.string ?? " ")
-                                .font(.caption2)
-                                .foregroundColor(.red)
+                                .font(VPFonts.SFProTextLight12)
+                                .foregroundColor(VPColors.subTitle)
                         }
                     }
                 }

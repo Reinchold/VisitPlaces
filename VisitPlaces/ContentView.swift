@@ -8,11 +8,24 @@
 import SwiftUI
 import GoogleMaps
 
+/*
+ @Environment(\.intGenerator) var intGenerator: IntGenerator
+
+ @State private var value = 0
+ var body: some View {
+     Text("\(value)")
+         .onReceive(intGenerator.$newValue) { self.value = $0 }
+ }
+ */
 struct ContentView: View {
     
     @EnvironmentObject var rootViewModel: RootViewModel
-    
+    @Environment(\.colorScheme) var colorScheme
     @State var scale: CGFloat = 1.0
+    
+    var fontColor: Color {
+        colorScheme == .dark ? .white : .black
+    }
     
     var body: some View {
         
@@ -85,6 +98,15 @@ struct ContentView: View {
 
         }
         .edgesIgnoringSafeArea(.all)
+        .onChange(of: colorScheme) { mode in
+            let style = mode == .light ? "style-light" : "style-dark"
+
+            do {
+                rootViewModel.mapView.mapStyle = try GMSMapStyle(named: style)
+            } catch {
+                NSLog("One or more of the map styles failed to load. \(error)")
+            }
+        }
         
 //        .alert(isPresented: $rootViewModel.showAlert) {
 //            Alert(title: Text("Error"),

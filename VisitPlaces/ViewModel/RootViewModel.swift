@@ -28,11 +28,13 @@ final class RootViewModel: ObservableObject {
     var isNeedsMapUpdate = false
     
     private let placeClient = GMSPlacesClient()
+    @Published var userInterfaceStyle: UIUserInterfaceStyle = .light
+    @Published var mapView = GMSMapView()
     
     // input
     @Published var searchTextField: String = ""
     @Published var searchTextFieldCheck: String = ""
-
+    
     @Published var cameraPosition: GMSCameraPosition = GMSCameraPosition.cameraPosition
     @Published var searchType = "bar"
     @Published var locationRadius: Float = 300.0
@@ -49,7 +51,6 @@ final class RootViewModel: ObservableObject {
     @Published var autocompletePredictions = [GMSAutocompletePrediction]()
     @Published var autocompletePrediction: GMSAutocompletePrediction?
     @Published var resultPlaces = [ResultPlaces]()
-//    @Published var resultPlaceMarkerSelected: ResultPlaces?
     @Published var gmsPlace: GMSPlace?
     @Published var placePhotos: [PlacePhotos] = []
     @Published var zoomImage: UIImage?
@@ -73,11 +74,11 @@ final class RootViewModel: ObservableObject {
             .removeDuplicates()
             .eraseToAnyPublisher()
     }
-        
+    
     init() {
         observePlaces()
     }
-     
+    
     private func observePlaces() {
         $zoomImage
             .map { $0 != nil }
@@ -149,10 +150,10 @@ extension RootViewModel {
     func getLatLongFromAutocompletePrediction(prediction: GMSAutocompletePrediction) {
         placeClient.lookUpPlaceID(prediction.placeID) { (place, error) -> Void in
             if let error = error {
-                 //show error
+                //show error
                 return
             }
-
+            
             if let place = place {
                 self.cameraPosition = GMSCameraPosition(latitude: place.coordinate.latitude, longitude: place.coordinate.longitude, zoom: 15)
             } else {
@@ -182,7 +183,7 @@ extension RootViewModel {
         let businessStatus = UInt(GMSPlaceField.businessStatus.rawValue)
         
         let fields: GMSPlaceField = GMSPlaceField(rawValue: name | photos | rating | openingHours | addressComponents | formattedAddress | businessStatus)
- 
+        
         placeClient.fetchPlace(fromPlaceID: markerPlaces.placeId, placeFields: fields, sessionToken: nil, callback: { (place: GMSPlace?, error: Error?) in
             if let error = error {
                 print("An error occurred: \(error.localizedDescription)")
@@ -235,6 +236,6 @@ extension RootViewModel {
             }
         }
     }
-
+    
 }
 

@@ -95,7 +95,7 @@ struct ModalView<Content: View> : View {
                                 
                                 // Header - body
                                 Rectangle()
-                                    .fill(colorScheme == .dark ? Color.black : Color.white)
+                                    .fill(VPColors.systemBackground)
                                     .frame(width: width,
                                            height: spacer)
                                     .cornerRadius(10, corners: [.topLeft, .topRight])
@@ -103,22 +103,23 @@ struct ModalView<Content: View> : View {
                                 
                                 // Horizontal line
                                 Rectangle()
-                                    .fill(Color.red.opacity(0.8))
+                                    .fill(VPColors.subTitle)
                                     .frame(width: 50, height: 4, alignment: .center)
                                     .cornerRadius(2)
                             }
                             
                             Divider()
-                                .background(.gray)
+                                .background(VPColors.subTitle)
                                 .frame(width: width)
                             
                             ZStack {
+                                
                                 // Content
                                 content()
-                                    .padding(.bottom, offset)
+                                    .padding(.bottom, dragState.isDragging ? .zero : offset)
                                     .frame(width: width, height: maxHeight-spacer)
                                     .clipped()
-                                    .background(.white)
+                                    .background(VPColors.systemBackground)
                             }
                         }
                         .padding(.top, spacer)
@@ -136,13 +137,14 @@ struct ModalView<Content: View> : View {
                 }
             }
         }
+        
     }
     
     // MARK: - Calculate end of dragging
     private func onDragEnded(drag: DragGesture.Value) {
         if position == .top {
             // calculate in half the screen.
-            let startMiddleThreshold = maxHeight * (1/6)
+            let startMiddleThreshold: CGFloat = .zero
             let endMiddleThreshold = maxHeight * (4/6)
             let middleRange: ClosedRange<CGFloat> = startMiddleThreshold...endMiddleThreshold
             

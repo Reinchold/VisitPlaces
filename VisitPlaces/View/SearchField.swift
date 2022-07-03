@@ -26,17 +26,17 @@ struct SearchField: View {
                             .resizable()
                             .frame(width: self.rootViewModel.isShownSettingView ? 18 : 22, height: 18)
                             .scaledToFit()
-                            .foregroundColor(Color.red.opacity(0.9))
+                            .foregroundColor(VPColors.subTitle)
                     }
                     
                     // Search TextField
                     TextField("", text: $rootViewModel.searchTextField)
                         .placeholder(when: rootViewModel.searchTextField.isEmpty) {
-                            Text("Enter address").foregroundColor(.red).opacity(0.5)
+                            Text("Enter address").foregroundColor(.accentColor).opacity(0.5)
                         }
-                        .font(.title3)
-                        .accentColor(.red)
-                        .foregroundColor(.red)
+                        .font(VPFonts.SFProTextRegular18)
+                        .accentColor(VPColors.title)
+                        .foregroundColor(VPColors.title)
                         .padding(.leading, 10)
                         .disabled(rootViewModel.isShownSettingView)
                         
@@ -44,7 +44,7 @@ struct SearchField: View {
                     if rootViewModel.searchTextField != "" {
                         Image(systemName: "xmark.circle.fill")
                             .imageScale(.medium)
-                            .foregroundColor(Color.red.opacity(0.7))
+                            .foregroundColor(VPColors.subTitle)
                             .padding(3)
                             .onTapGesture {
                                 withAnimation {
@@ -60,7 +60,7 @@ struct SearchField: View {
                     }, label: {
                         Image(systemName: "magnifyingglass")
                             .resizable()
-                            .foregroundColor(Color.red.opacity(0.9))
+                            .foregroundColor(VPColors.subTitle)
                             .shadow(color: Color.primary.opacity(0.3),
                                     radius: 5,
                                     x: 1,
@@ -72,7 +72,7 @@ struct SearchField: View {
                     .padding(.trailing, 10)
                 }
                 .padding(.all, 15)
-                .background(Color.white)
+                .background(VPColors.systemBackground)
                 .cornerRadius(10)
                 .shadow(radius: 3)
             }

@@ -21,7 +21,7 @@ struct CheckboxField: View, Identifiable {
     init(id: String,
          label: String,
          size: CGFloat = 10,
-         color: Color = Color.red,
+         color: Color = VPColors.title,
          textSize: Int = 14,
          callback: @escaping (String)->(),
          rootViewModel: RootViewModel
@@ -48,12 +48,12 @@ struct CheckboxField: View, Identifiable {
                     .frame(width: self.size, height: self.size)
                 
                 Text(label)
-                    .font(Font.system(size: size))
+                    .font(VPFonts.SFProTextRegular16)
                 
                 Spacer()
             }.foregroundColor(self.color)
         }
-        .foregroundColor(Color.white)
+        .foregroundColor(VPColors.systemBackground)
     }
 }
 
@@ -89,19 +89,30 @@ struct SettingView: View {
     
     var body: some View {
         VStack {
-            Text("Show places")
-                .font(.title2)
-                .foregroundColor(Color.red)
-            List(self.generateList()) {$0}
+            Text("Wahl der Einrichtung")
+                .font(VPFonts.SFProTextHeavy22)
+                .foregroundColor(VPColors.title)
+                .padding(.bottom, 20)
+            
+            List(self.generateList()) {$0}.listStyle(PlainListStyle())
             
             let result = rootViewModel.locationRadius < VPConstants.maxRadius ? "m" : "km"
             let mKm = rootViewModel.locationRadius < VPConstants.maxRadius ? rootViewModel.locationRadius : rootViewModel.locationRadius/VPConstants.maxRadius
-            Text("Umkreis: \(Int(mKm)) \(result)" )
-                .font(.title2)
-                .foregroundColor(Color.red)
+            
+            HStack {
+                Image(systemName: "mappin.and.ellipse")
+                    .resizable()
+                    .frame(width: 18, height: 18)
+                    .scaledToFit()
+                    .foregroundColor(VPColors.subTitle)
+                
+                Text("\(Int(mKm)) \(result)" )
+                    .font(VPFonts.SFProTextHeavy16)
+                    .foregroundColor(VPColors.title)
+            }
             
             CustomSliderView()
-                .accentColor(Color.red)
+                .accentColor(VPColors.title)
                 .frame(width: 200, height: 44)
             
         }

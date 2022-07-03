@@ -27,15 +27,22 @@ struct PlacesDetailView: View {
                     
                     // Title
                     Text(rootViewModel.gmsPlace?.name ?? "")
+                        .font(VPFonts.SFProTextHeavy22)
+                        .foregroundColor(VPColors.title)
+                    
                     HStack(spacing: 10) {
                         
                         // Rating
                         RatingStar(rating: rootViewModel.gmsPlace?.rating ?? .zero)
                         Text(String(format: "%.1f", rootViewModel.gmsPlace?.rating ?? 0))
+                            .font(VPFonts.SFProTextRegular16)
+                            .foregroundColor(VPColors.subTitle)
                     }
                     
                     // Address
                     Text(rootViewModel.gmsPlace?.formattedAddress ?? "")
+                        .font(VPFonts.SFProTextLight12)
+                        .foregroundColor(VPColors.subTitle)
                 }
                 .padding(.horizontal, 20)
                 
@@ -43,6 +50,7 @@ struct PlacesDetailView: View {
                 VStack(alignment: .leading, spacing: 0) {
                     HStack {
                         Text(isOpenNow ? "Geöffnet" : "Geschlossen")
+                            .font(VPFonts.SFProTextRegular16)
                             .foregroundColor(isOpenNow ? .green : .red)
                             .padding(5)
 
@@ -58,9 +66,12 @@ struct PlacesDetailView: View {
                                 ForEach(openingHours, id: \.self) { text in
                                     HStack {
                                         Text(Calendar.current.weekdaySymbols[Int(text.openEvent.day.rawValue) - 1])
+                                            .font(VPFonts.SFProTextLight16)
                                         Spacer()
                                         Text(getTimePeriodString(from: text))
+                                            .font(VPFonts.SFProTextLight16)
                                     }
+                                    .foregroundColor(VPColors.title)
                                 }
                             }
                         }
@@ -95,6 +106,7 @@ struct PlacesDetailView: View {
             }
             .padding(.vertical, 20)
         }
+        .background(VPColors.systemBackground)
         .frame(maxHeight: rootViewModel.gmsPlace == nil ? .zero : .infinity)
     }
     

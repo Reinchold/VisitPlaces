@@ -15,16 +15,16 @@ struct CustomSliderView: View {
         GeometryReader { geometry in
             ZStack(alignment: .leading) {
                 Rectangle()
-                    .foregroundColor(.gray)
+                    .foregroundColor(.secondary)
                 Rectangle()
                     .foregroundColor(.accentColor)
-                    .frame(width: geometry.size.width * CGFloat(self.rootViewModel.locationRadius / VPConstants.maxRadius))
+                    .frame(width: geometry.size.width * CGFloat(rootViewModel.locationRadius / VPConstants.maxRadius))
             }
             .cornerRadius(12)
             .gesture(DragGesture(minimumDistance: 0)
                 .onChanged({ value in
                     let step = stepper(value.location.x, geometry.size.width, CGFloat(VPConstants.maxRadius))
-                    self.rootViewModel.locationRadius = min(max(10, step), VPConstants.maxRadius)
+                    rootViewModel.locationRadius = min(max(10, step), VPConstants.maxRadius)
                 }))
         }
     }
