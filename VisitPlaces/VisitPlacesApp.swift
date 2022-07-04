@@ -23,8 +23,8 @@ struct VisitPlacesApp: App {
 
 class AppDelegate: NSObject, UIApplicationDelegate    {
      func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
-         GMSServices.provideAPIKey(VPConstants.apiKey)
          GMSPlacesClient.provideAPIKey(VPConstants.apiKey)
+         GMSServices.provideAPIKey(VPConstants.apiKey)
          
          return true
      }

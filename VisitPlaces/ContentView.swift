@@ -11,10 +11,16 @@ import GoogleMaps
 struct ContentView: View {
     
     @EnvironmentObject var rootViewModel: RootViewModel
+    @Environment(\.colorScheme) var colorScheme
+    @State var scale: CGFloat = 1.0
+    
+    var fontColor: Color {
+        colorScheme == .dark ? .white : .black
+    }
     
     var body: some View {
         
-        ZStack(alignment: .bottom) {
+        GeometryReader { geometry in
             // Left bar menu
             HStack {
                 VStack(alignment: .leading, spacing: 12) {
@@ -23,90 +29,83 @@ struct ContentView: View {
                 }
                 .padding(.top, 25)
                 .padding(.horizontal, 20)
-                
+
                 Spacer(minLength: 0)
             }
-            .padding(.top, UIApplication
-                                .shared
-                                .connectedScenes
-                                .flatMap { ($0 as? UIWindowScene)?.windows ?? [] }
-                                .first { $0.isKeyWindow }?.safeAreaInsets.top)
-            .padding(.bottom, UIApplication
-                                .shared
-                                .connectedScenes
-                                .flatMap { ($0 as? UIWindowScene)?.windows ?? [] }
-                                .first { $0.isKeyWindow }?.safeAreaInsets.bottom)
-            
-            // MainView...
+            .padding(.top, UIApplication.shared.keyWindow?.safeAreaInsets.top)
+            .padding(.bottom, UIApplication.shared.keyWindow?.safeAreaInsets.bottom)
+
+            // MainView (Map)
             ZStack(alignment: .top) {
                 PlacesFetcher()
-                GoogleMapsView(rootViewModel: rootViewModel, landmarks: $rootViewModel.interestPoints)
-                
-                HStack(spacing: 8) {
-                    // Close Button...
-                    Button(action: {
-                        withAnimation {
-                            self.rootViewModel.isShownSettingView.toggle()
+                GoogleMapsView()
+                 
+                // window blocker
+                if rootViewModel.isShownSettingView {
+                    Rectangle()
+                        .fill(Color.secondary.opacity(0.3))
+                        .edgesIgnoringSafeArea(.all)
+                        .onTapGesture {
+                            withAnimation {
+                                rootViewModel.isShownSettingView = false
+                            }
                         }
-                    }) {
-                        Image(systemName: self.rootViewModel.isShownSettingView ? "xmark" : "line.horizontal.3")
-                            .resizable()
-                            .frame(width: self.rootViewModel.isShownSettingView ? 18 : 22, height: 18)
-                            .scaledToFit()
-                            .foregroundColor(Color.red.opacity(0.7))
-                            .padding(SwiftUI.EdgeInsets(top: 18, leading: 12, bottom: 18, trailing: 12))
-                            .background(.white)
+                }
+                
+                // Search Field
+                SearchField()
+                    .frame(width: geometry.size.width*0.9)
+                    .padding(.top, UIApplication.shared.keyWindow?.safeAreaInsets.top)
+                
+                // MARK: - Autocomplete Prediction
+                ModalView(isShown: $rootViewModel.isShownAutocompleteModalView, midHeight: 300, width: geometry.size.width) {
+                    PlacesListView()
+                } callback: {
+                    withAnimation {
+                        rootViewModel.autocompletePredictions.removeAll()
                     }
-                    .cornerRadius(8)
-                    .shadow(radius: 3)
-                    
-                    // Search TextField
-                    TextField("", text: $rootViewModel.searchInput)
-                        .placeholder(when: rootViewModel.searchInput.isEmpty) {
-                            Text("Enter address").foregroundColor(.red).opacity(0.5)
-                        }
-                        .font(.title3)
-                        .accentColor(.red)
-                        .foregroundColor(.red)
-                        .padding(.all, 15)
-                        .background(Color.white)
-                        .cornerRadius(10)
-                        .shadow(radius: 3)
-                }
-                .padding(.top, UIApplication
-                    .shared
-                    .connectedScenes
-                    .flatMap { ($0 as? UIWindowScene)?.windows ?? [] }
-                    .first { $0.isKeyWindow }?.safeAreaInsets.top)
-                .padding()
-                
-                // Modal View - List
-                ModalView(orientationShapeWidth: UIScreen.main.bounds.size.width,
-                          modalHeight: 300) {
-                        PlacesListView()
                 }
                 
+                // MARK: - Place Detail
+                ModalView(isShown: $rootViewModel.isShownPlaceDetail, midHeight: 300, width: geometry.size.width, isFullScreenable: true) {
+                    PlacesDetailView()
+                } callback: {
+                    rootViewModel.gmsPlace = nil
+                }
+
+                // MARK: - Photo zoomer
+                ZStack {
+                    if rootViewModel.isShownPhotoZoom {
+                        PhotoZoom()
+                    }
+                }
+                .transition(.slide)
             }
-            
             .cornerRadius(self.rootViewModel.isShownSettingView ? 30 : 0)
             .scaleEffect(self.rootViewModel.isShownSettingView ? 0.9 : 1)
             .offset(x: self.rootViewModel.isShownSettingView ? UIScreen.main.bounds.width / 2 : 0,
                     y: self.rootViewModel.isShownSettingView ? 100 : 0)
             .rotationEffect(.init(degrees: self.rootViewModel.isShownSettingView ? -5 : 0))
-            
+
         }
         .edgesIgnoringSafeArea(.all)
+        .onChange(of: colorScheme) { mode in
+            let style = mode == .light ? "style-light" : "style-dark"
+
+            do {
+                rootViewModel.mapView.mapStyle = try GMSMapStyle(named: style)
+            } catch {
+                NSLog("One or more of the map styles failed to load. \(error)")
+            }
+        }
         
-//        .alert(isPresented: $rootViewModel.showAlert) {
-//            Alert(title: Text("Error"),
-//                  message: Text(rootViewModel.articlesError?.localizedDescription ?? ""),
-//                  dismissButton: .default(Text("OK"),
-//                                          action: { rootViewModel.articlesError = nil }
-//                  )
-//            )
-//        }
+        .alert(isPresented: $rootViewModel.isAlertShown) {
+            Alert(title: Text("Fehler"),
+                  message: Text(rootViewModel.articlesError?.errorDescription ?? ""),
+                  dismissButton: .default(Text("OK"), action: { rootViewModel.articlesError = nil })
+            )
+        }
     }
-    
     
 }
 
