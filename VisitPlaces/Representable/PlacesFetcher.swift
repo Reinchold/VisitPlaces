@@ -65,7 +65,6 @@ struct PlacesFetcher: UIViewControllerRepresentable {
         }
         
         func didFailAutocompleteWithError(_ error: Error) {
-            print("💚")
         }
 
     }

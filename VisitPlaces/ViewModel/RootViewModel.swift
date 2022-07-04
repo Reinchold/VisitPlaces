@@ -169,8 +169,6 @@ extension RootViewModel {
     }
     
     // MARK: - Place Details (get information about a place)
-    // Details - https://developers.google.com/maps/documentation/places/ios-sdk/place-details
-    // Fields - https://developers.google.com/maps/documentation/places/ios-sdk/place-data-fields
     func getPlaceDetails(_ marker: GMSMarker) {
         endEditing()
         

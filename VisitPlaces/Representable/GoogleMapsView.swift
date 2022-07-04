@@ -4,7 +4,6 @@
 //
 //  Created by Roman Vostrikov on 13.06.22.
 //
-//  https://stackoverflow.com/questions/21021531/how-to-get-the-number-of-annotations-markers-in-a-visible-area-of-map-using-goog
 
 import SwiftUI
 import GoogleMaps
@@ -116,7 +115,6 @@ struct GoogleMapsView: UIViewRepresentable {
         func mapView(_ mapView: GMSMapView, didTapAt coordinate: CLLocationCoordinate2D) {
             parent.rootViewModel.gmsPlace = nil
             parent.rootViewModel.endEditing()
-//            parent.rootViewModel.marker?.tracksInfoWindowChanges = false
         }
     }
 

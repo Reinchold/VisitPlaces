@@ -8,15 +8,6 @@
 import SwiftUI
 import GoogleMaps
 
-/*
- @Environment(\.intGenerator) var intGenerator: IntGenerator
-
- @State private var value = 0
- var body: some View {
-     Text("\(value)")
-         .onReceive(intGenerator.$newValue) { self.value = $0 }
- }
- */
 struct ContentView: View {
     
     @EnvironmentObject var rootViewModel: RootViewModel

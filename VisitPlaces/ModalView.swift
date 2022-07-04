@@ -125,7 +125,7 @@ struct ModalView<Content: View> : View {
                         .padding(.top, spacer)
                     }
                     .offset(y: offsetCalculation)
-                    .animation(.interpolatingSpring(stiffness: 200, damping: 30.0, initialVelocity: 10.0))
+                    .animation(.interpolatingSpring(stiffness: 200, damping: 30.0, initialVelocity: 10.0), value: offset)
                     .gesture(drag)
                 }
             }

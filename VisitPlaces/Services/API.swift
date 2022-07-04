@@ -5,11 +5,6 @@
 //  Created by Roman Vostrikov on 15.06.22.
 //
 
-/*
- https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=-33.8670522%2C151.1957362&radius=1500&type=restaurant&key=AIzaSyAypXKfnqbdPKOiH-i4G9WhfNawEfYPA2s
- https://maps.googleapis.com/maps/api/place/nearbysearch/json?place_id=ChIJZ4S6wMpLqEcRyYUJK3qxnEI&key=AIzaSyAypXKfnqbdPKOiH-i4G9WhfNawEfYPA2s
- https://maps.googleapis.com/maps/api/geocode/json?address=1600+Amphitheatre+Parkway,+Mountain+View,+CA&key=AIzaSyAypXKfnqbdPKOiH-i4G9WhfNawEfYPA2s
- */
 import GoogleMaps
 import Combine
 

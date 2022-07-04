@@ -38,7 +38,5 @@ struct PlacesListView: View {
                     }
                 }
             }
-//        .listStyle(PlainListStyle()) // https://stackoverflow.com/questions/56474019/how-to-change-liststyle-in-list
-//        .listSectionSeparatorTint(.red) // https://peterfriese.dev/posts/swiftui-listview-part3/
     }
 }

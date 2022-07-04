@@ -57,8 +57,6 @@ struct CheckboxField: View, Identifiable {
     }
 }
 
-// https://developers.google.com/maps/documentation/places/android-sdk/reference/com/google/android/libraries/places/api/model/Place.Type?hl=en
-
 enum SectionList: String, CaseIterable {
     case bar, cafe, casino, bank, clothing_store, gym, hair_care
     
