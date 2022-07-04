@@ -7,15 +7,18 @@
 
 import Foundation
 
-enum APIError: Error {
+enum APIError: LocalizedError {
     
     case urlError(URLError)
     case responseError((Int, String))
     case decodingError(DecodingError)
     case genericError
+    case imageDownload
+    case fetchPlace
+    case placeDetails
     
-    
-    var localizedDescription: String {
+    /// A localized message describing what error occurred.
+    var errorDescription: String? {
         switch self { 
         case .urlError(let error):
             return error.localizedDescription
@@ -47,9 +50,19 @@ enum APIError: Error {
             return  errorToReport
             
         case .genericError:
-            return "An unknown error has been occured"
+            return "Ein unbekannter Fehler ist aufgetreten"
+        case .imageDownload:
+            return "Beim Hochladen von Fotos ist ein Problem aufgetreten"
+        case .fetchPlace:
+            return "Standort konnte nicht geladen werden"
+        case .placeDetails:
+            return "Detaillierte Standortbeschreibung konnte nicht geladen werden"
         }
     }
+    
+    /// A localized message describing the reason for the failure.
+//    var failureReason: String? {  }
+
+    /// A localized message describing how one might recover from the failure.
+//    var recoverySuggestion: String? {  }
 }
-
-

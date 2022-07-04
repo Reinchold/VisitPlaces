@@ -44,6 +44,7 @@ final class RootViewModel: ObservableObject {
     @Published var isShownPlaceDetail = false
     @Published var isShownPhotoZoom = false
     @Published var isOpeningHoursDisclosed = false
+    @Published var isAlertShown = false
     
     @Published var keyboardHeight: CGFloat = .zero
     
@@ -76,10 +77,15 @@ final class RootViewModel: ObservableObject {
     }
     
     init() {
-        observePlaces()
+        getPublishers()
     }
     
-    private func observePlaces() {
+    private func getPublishers() {
+        $articlesError
+            .map { $0 != nil }
+            .assign(to: \.isAlertShown, on: self)
+            .store(in: &cancellableSet)
+        
         $zoomImage
             .map { $0 != nil }
             .assign(to: \.isShownPhotoZoom, on: self)
@@ -150,14 +156,13 @@ extension RootViewModel {
     func getLatLongFromAutocompletePrediction(prediction: GMSAutocompletePrediction) {
         placeClient.lookUpPlaceID(prediction.placeID) { (place, error) -> Void in
             if let error = error {
-                //show error
+                print("An error occurred: \(error.localizedDescription)")
+                self.articlesError = APIError.placeDetails
                 return
             }
             
             if let place = place {
                 self.cameraPosition = GMSCameraPosition(latitude: place.coordinate.latitude, longitude: place.coordinate.longitude, zoom: 15)
-            } else {
-                //show error
             }
         }
     }
@@ -193,6 +198,7 @@ extension RootViewModel {
         placeClient.fetchPlace(fromPlaceID: markerPlaces.placeId, placeFields: fields, sessionToken: nil, callback: { (place: GMSPlace?, error: Error?) in
             if let error = error {
                 print("An error occurred: \(error.localizedDescription)")
+                self.articlesError = APIError.fetchPlace
                 return
             }
             if let place = place {
@@ -217,8 +223,8 @@ extension RootViewModel {
                 self.placeClient.loadPlacePhoto(photoMetadata, callback: { (image, error) -> Void in
                     
                     if let error = error {
-                        // TODO: Handle the error.
                         print("Error loading photo metadata: \(error.localizedDescription)")
+                        self.articlesError = APIError.imageDownload
                     }
                     
                     if let image = image {

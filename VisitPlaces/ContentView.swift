@@ -99,16 +99,13 @@ struct ContentView: View {
             }
         }
         
-//        .alert(isPresented: $rootViewModel.showAlert) {
-//            Alert(title: Text("Error"),
-//                  message: Text(rootViewModel.articlesError?.localizedDescription ?? ""),
-//                  dismissButton: .default(Text("OK"),
-//                                          action: { rootViewModel.articlesError = nil }
-//                  )
-//            )
-//        }
+        .alert(isPresented: $rootViewModel.isAlertShown) {
+            Alert(title: Text("Fehler"),
+                  message: Text(rootViewModel.articlesError?.errorDescription ?? ""),
+                  dismissButton: .default(Text("OK"), action: { rootViewModel.articlesError = nil })
+            )
+        }
     }
-    
     
 }
 
