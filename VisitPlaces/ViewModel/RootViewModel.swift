@@ -162,10 +162,18 @@ extension RootViewModel {
         }
     }
     
+    func endEditing() {
+        // End text editing
+        UIApplication.shared.keyWindow?.endEditing(true)
+        autocompletePredictions.removeAll()
+    }
+    
     // MARK: - Place Details (get information about a place)
     // Details - https://developers.google.com/maps/documentation/places/ios-sdk/place-details
     // Fields - https://developers.google.com/maps/documentation/places/ios-sdk/place-data-fields
     func getPlaceDetails(_ marker: GMSMarker) {
+        endEditing()
+        
         guard self.marker != marker else { return }
         guard let markerPlaces = marker.userData as? ResultPlaces else { return }
         if self.marker != nil {

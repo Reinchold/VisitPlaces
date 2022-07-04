@@ -23,8 +23,7 @@ struct PlacesListView: View {
                         
                         Task {
                             try await Task.sleep(seconds: 1)
-                            // FIXME: - change the logic for adding text to the search field
-                            rootViewModel.autocompletePredictions.removeAll()
+                            rootViewModel.endEditing()
                         }
                         
                     }) {

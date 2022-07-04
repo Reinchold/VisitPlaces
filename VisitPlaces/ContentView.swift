@@ -41,8 +41,8 @@ struct ContentView: View {
 
                 Spacer(minLength: 0)
             }
-            .padding(.top, UIApplication.shared.safeAreaInsets?.top)
-            .padding(.bottom, UIApplication.shared.safeAreaInsets?.bottom)
+            .padding(.top, UIApplication.shared.keyWindow?.safeAreaInsets.top)
+            .padding(.bottom, UIApplication.shared.keyWindow?.safeAreaInsets.bottom)
 
             // MainView (Map)
             ZStack(alignment: .top) {
@@ -64,7 +64,7 @@ struct ContentView: View {
                 // Search Field
                 SearchField()
                     .frame(width: geometry.size.width*0.9)
-                    .padding(.top, UIApplication.shared.safeAreaInsets?.top)
+                    .padding(.top, UIApplication.shared.keyWindow?.safeAreaInsets.top)
                 
                 // MARK: - Autocomplete Prediction
                 ModalView(isShown: $rootViewModel.isShownAutocompleteModalView, midHeight: 300, width: geometry.size.width) {

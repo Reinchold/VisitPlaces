@@ -30,7 +30,11 @@ struct SearchField: View {
                     }
                     
                     // Search TextField
-                    TextField("", text: $rootViewModel.searchTextField)
+                    TextField("", text: $rootViewModel.searchTextField, onEditingChanged: { focused in
+                        if focused {
+                            rootViewModel.gmsPlace = nil
+                        }
+                    })
                         .placeholder(when: rootViewModel.searchTextField.isEmpty) {
                             Text("Enter address").foregroundColor(.accentColor).opacity(0.5)
                         }

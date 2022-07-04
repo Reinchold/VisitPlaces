@@ -115,6 +115,7 @@ struct GoogleMapsView: UIViewRepresentable {
         
         func mapView(_ mapView: GMSMapView, didTapAt coordinate: CLLocationCoordinate2D) {
             parent.rootViewModel.gmsPlace = nil
+            parent.rootViewModel.endEditing()
 //            parent.rootViewModel.marker?.tracksInfoWindowChanges = false
         }
     }

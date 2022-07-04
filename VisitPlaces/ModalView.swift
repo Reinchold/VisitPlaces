@@ -54,7 +54,7 @@ struct ModalView<Content: View> : View {
     // UIScreen height
     private var maxHeight: CGFloat {
         let screenHeight = UIScreen.main.bounds.size.height
-        let safeAreaTop = UIApplication.shared.safeAreaInsets?.top ?? 0
+        let safeAreaTop = UIApplication.shared.keyWindow?.safeAreaInsets.top ?? 0
         
         return screenHeight-safeAreaTop
     }
