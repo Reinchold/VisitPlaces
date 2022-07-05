@@ -54,7 +54,7 @@ struct ModalView<Content: View> : View {
     // UIScreen height
     private var maxHeight: CGFloat {
         let screenHeight = UIScreen.main.bounds.size.height
-        let safeAreaTop = UIApplication.shared.keyWindow?.safeAreaInsets.top ?? 0
+        let safeAreaTop = UIApplication.shared.safeAreaInsets?.top ?? 0
         
         return screenHeight-safeAreaTop
     }
@@ -125,7 +125,7 @@ struct ModalView<Content: View> : View {
                         .padding(.top, spacer)
                     }
                     .offset(y: offsetCalculation)
-                    .animation(.interpolatingSpring(stiffness: 200, damping: 30.0, initialVelocity: 10.0), value: offset)
+                    .animation(.interpolatingSpring(stiffness: 200, damping: 30.0, initialVelocity: 10.0))
                     .gesture(drag)
                 }
             }
@@ -163,7 +163,7 @@ struct ModalView<Content: View> : View {
             }
         } else if position == .middle {
             let dragThreshold = midHeight * (2/3)
-            if drag.predictedEndTranslation.height < 0 || drag.translation.height < 0 {
+            if (drag.predictedEndTranslation.height < 0) && isFullScreenable {
                 offset = 0
                 position = .top
             } else if drag.predictedEndTranslation.height > dragThreshold || drag.translation.height > dragThreshold {

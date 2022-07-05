@@ -121,6 +121,10 @@
 		C13BF48B286237C200E749BC /* GMSMapStyle+extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GMSMapStyle+extension.swift"; sourceTree = "<group>"; };
 		C13DF66E2863499A001BA62E /* GMSMarker+extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GMSMarker+extension.swift"; sourceTree = "<group>"; };
 		C141DA7F286A583A00C5739E /* ImageSkeleton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageSkeleton.swift; sourceTree = "<group>"; };
+		C146CC2B28744F7000786614 /* Demo-01.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = "Demo-01.gif"; sourceTree = "<group>"; };
+		C146CC2C28744F7100786614 /* Demo-02.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = "Demo-02.gif"; sourceTree = "<group>"; };
+		C146CC2D28744F7100786614 /* Demo-03.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = "Demo-03.gif"; sourceTree = "<group>"; };
+		C146CC2E28744FC600786614 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		C14727222860F33C00D883CB /* SearchField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchField.swift; sourceTree = "<group>"; };
 		C14727242861122C00D883CB /* GoogleGeocoding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleGeocoding.swift; sourceTree = "<group>"; };
 		C14EF0DF2871C0DE00D5F8D8 /* style-dark.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "style-dark.json"; sourceTree = "<group>"; };
@@ -171,6 +175,10 @@
 		C10FC34A28574A670089BC92 = {
 			isa = PBXGroup;
 			children = (
+				C146CC2B28744F7000786614 /* Demo-01.gif */,
+				C146CC2C28744F7100786614 /* Demo-02.gif */,
+				C146CC2D28744F7100786614 /* Demo-03.gif */,
+				C146CC2E28744FC600786614 /* README.md */,
 				C10FC35528574A670089BC92 /* VisitPlaces */,
 				C10FC35428574A670089BC92 /* Products */,
 				C10FC36F28574EF60089BC92 /* Frameworks */,
@@ -600,8 +608,8 @@
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -636,8 +644,8 @@
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
