@@ -9,8 +9,8 @@ import GoogleMaps
 
 enum VPConstants {
     
-    #error("Register for API Key and insert here. Then delete this line.")
-    static let apiKey = ""
+//    #error("Register for API Key and insert here. Then delete this line.")
+    static let apiKey = "AIzaSyC1v30lHI6NaFeS1qtdu4S4GroQF3KVx-s"
     static let maxRadius: Float = 1000
     static let radiusStep: CGFloat = 10
 }
