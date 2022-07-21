@@ -5,21 +5,16 @@
 //  Created by Roman Vostrikov on 13.06.22.
 //
 
-import Combine
 import GooglePlaces
 import GoogleMaps
+import Combine
 import SwiftUI
-
-struct PlacePhotos: Identifiable, Hashable {
-    let id: Int
-    var photo: UIImage
-    var attributedString: NSAttributedString?
-}
 
 final class RootViewModel: ObservableObject {
     
     // GMSAutocompleteFetcher wrapped to UIViewController
     let fetcherViewController = WrapperFetcherViewController()
+    let dataManager: GoogleDataManager
     
     // GoogleMaps markers
     var markers: [GMSMarker] = []
@@ -27,7 +22,7 @@ final class RootViewModel: ObservableObject {
     
     var isNeedsMapUpdate = false
     
-    private let placeClient = GMSPlacesClient()
+    
     @Published var userInterfaceStyle: UIUserInterfaceStyle = .light
     @Published var mapView = GMSMapView()
     
@@ -53,7 +48,7 @@ final class RootViewModel: ObservableObject {
     @Published var autocompletePrediction: GMSAutocompletePrediction?
     @Published var resultPlaces = [ResultPlaces]()
     @Published var gmsPlace: GMSPlace?
-    @Published var placePhotos: [PlacePhotos] = []
+    @MainActor @Published var placePhotos: [PlacePhoto] = []
     @Published var zoomImage: UIImage?
     private let imageCache = NSCache<NSString, NSData>()
     
@@ -76,11 +71,36 @@ final class RootViewModel: ObservableObject {
             .eraseToAnyPublisher()
     }
     
-    init() {
-        getPublishers()
+    init(dataManager: GoogleDataManager = GoogleDataManager()) {
+        self.dataManager = dataManager
+        addSubscribers()
+        Task {
+           try await addPlacesSubscriber()
+        }
     }
     
-    private func getPublishers() {
+    private func addPlacesSubscriber() async throws {
+        Task {
+            for await (point, radius, position) in Publishers.CombineLatest3(searchTypePublisher, locationRadiusPublisher, $cameraPosition).values {
+                do {
+                    let item = String(Int(radius))
+                    let coordinate = "\(position.target.latitude),\(position.target.longitude)"
+                    let output = try await APIService.getRecommendation(from: Endpoint.place(type: point, radius: item, coordinate: coordinate))
+                   
+                    await MainActor.run(body: {
+                        self.resultPlaces = output.results
+                        self.isNeedsMapUpdate = true
+                    })
+                } catch let error as APIError {
+                    await MainActor.run(body: {
+                        self.articlesError = error
+                    })
+                }
+            }
+        }
+    }
+    
+    private func addSubscribers() {
         $articlesError
             .map { $0 != nil }
             .assign(to: \.isAlertShown, on: self)
@@ -92,6 +112,7 @@ final class RootViewModel: ObservableObject {
             .store(in: &cancellableSet)
         
         $gmsPlace
+            .receive(on: DispatchQueue.main)
             .map { $0 != nil }
             .sink(receiveValue: { [unowned self] state in
                 if state {
@@ -104,25 +125,6 @@ final class RootViewModel: ObservableObject {
                 self.isShownPlaceDetail = state
             })
             .store(in: &cancellableSet)
-        
-        Publishers.CombineLatest3(searchTypePublisher, locationRadiusPublisher, $cameraPosition)
-            .setFailureType(to: APIError.self)
-            .flatMap { (point, radius, position) -> AnyPublisher<[ResultPlaces], APIError> in
-                self.resultPlaces = [ResultPlaces]()
-                let item = String(Int(radius))
-                let coordinate = "\(position.target.latitude),\(position.target.longitude)"
-                return API.shared.fetchRecommendations(from: Endpoint.place(type: point, radius: item, coordinate: coordinate))
-            }
-            .sink(
-                receiveCompletion: { [unowned self] (completion) in
-                    if case let .failure(error) = completion {
-                        self.articlesError = error
-                    }},
-                receiveValue: { [unowned self] in
-                    self.resultPlaces = $0
-                    self.isNeedsMapUpdate = true
-                })
-            .store(in: &self.cancellableSet)
         
         Publishers.CombineLatest($autocompletePredictions, $isShownSettingView)
             .receive(on: RunLoop.main)
@@ -137,117 +139,77 @@ final class RootViewModel: ObservableObject {
 
 extension RootViewModel {
     
-    func getGeocoding() {
-        API.shared.fetchPointDetail(from: Endpoint.geocode(address: searchTextField))
-            .sink(
-                receiveCompletion: { [unowned self] (completion) in
-                    if case let .failure(error) = completion {
-                        self.articlesError = error
-                    }
-                }, receiveValue: { geocoding in
-                    guard let location = geocoding.map({ $0.geometry.location }).first else { return }
-                    
-                    self.cameraPosition = GMSCameraPosition(latitude: location.lat, longitude: location.lng, zoom: 15)
-                })
-            .store(in: &self.cancellableSet)
+    func endEditing() async {
+        // End text editing
+        await MainActor.run(body: {
+            UIApplication.shared.keyWindow?.endEditing(true)
+            autocompletePredictions.removeAll()
+        })
     }
     
-    // MARK: - Autocomplete Prediction
-    func getLatLongFromAutocompletePrediction(prediction: GMSAutocompletePrediction) {
-        placeClient.lookUpPlaceID(prediction.placeID) { (place, error) -> Void in
-            if let error = error {
-                print("An error occurred: \(error.localizedDescription)")
-                self.articlesError = APIError.placeDetails
+    func getGeocoding() async throws {
+        do {
+            let geocoding = try await APIService.getPointDetail(from: Endpoint.geocode(address: searchTextField))
+            guard let location = geocoding.results.map({ $0.geometry.location }).first else {
                 return
             }
-            
-            if let place = place {
-                self.cameraPosition = GMSCameraPosition(latitude: place.coordinate.latitude, longitude: place.coordinate.longitude, zoom: 15)
-            }
+            self.cameraPosition = GMSCameraPosition(latitude: location.lat, longitude: location.lng, zoom: 15)
+        } catch let error as APIError {
+            await MainActor.run(body: {
+                self.articlesError = error
+            })
         }
     }
     
-    func endEditing() {
-        // End text editing
-        UIApplication.shared.keyWindow?.endEditing(true)
-        autocompletePredictions.removeAll()
+    func getLocation(prediction: GMSAutocompletePrediction) async throws {
+        do {
+            let place = try await dataManager.getLatLongFromAutocompletePrediction(prediction: prediction)
+            self.cameraPosition = GMSCameraPosition(latitude: place.coordinate.latitude, longitude: place.coordinate.longitude, zoom: 15)
+        } catch let error as APIError {
+            await MainActor.run(body: {
+                self.articlesError = error
+            })
+        }
     }
     
     // MARK: - Place Details (get information about a place)
-    func getPlaceDetails(_ marker: GMSMarker) {
-        endEditing()
+    func getPlaceDetails(_ marker: GMSMarker) async throws {
+        await endEditing()
         
         guard self.marker != marker else { return }
         guard let markerPlaces = marker.userData as? ResultPlaces else { return }
         if self.marker != nil {
-            self.placePhotos.removeAll()
-            self.marker?.setIconSize()
+            await MainActor.run(body: {
+                self.placePhotos.removeAll()
+                self.marker?.setIconSize()
+            })
         }
         self.marker = marker
         
-        let name = UInt(GMSPlaceField.name.rawValue)
-        let photos = UInt(GMSPlaceField.photos.rawValue)
-        let rating = UInt(GMSPlaceField.rating.rawValue)
-        let openingHours = UInt(GMSPlaceField.openingHours.rawValue)
-        let addressComponents = UInt(GMSPlaceField.addressComponents.rawValue)
-        let formattedAddress = UInt(GMSPlaceField.formattedAddress.rawValue)
-        let businessStatus = UInt(GMSPlaceField.businessStatus.rawValue)
-        
-        let fields: GMSPlaceField = GMSPlaceField(rawValue: name | photos | rating | openingHours | addressComponents | formattedAddress | businessStatus)
-        
-        placeClient.fetchPlace(fromPlaceID: markerPlaces.placeId, placeFields: fields, sessionToken: nil, callback: { (place: GMSPlace?, error: Error?) in
-            if let error = error {
-                print("An error occurred: \(error.localizedDescription)")
-                self.articlesError = APIError.fetchPlace
-                return
-            }
-            if let place = place {
+        do {
+            let place = try await dataManager.fetchPlace(markerPlaces)
+            await MainActor.run(body: {
                 self.gmsPlace = place
-                guard let photoMetadata = place.photos else { return }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                    self.getPlacePhotos(photoMetadatas: photoMetadata)
-                }
-            }
-        })
-    }
-    
-    private func getPlacePhotos(photoMetadatas: [GMSPlacePhotoMetadata]) {
-        DispatchQueue.global(qos: .userInitiated).async {
-            var photos: [PlacePhotos] = []
-            let group = DispatchGroup()
+            })
             
-            for (index, photoMetadata) in photoMetadatas.enumerated() {
-                group.enter()
-                
-                // Call loadPlacePhoto to display the bitmap and attribution.
-                self.placeClient.loadPlacePhoto(photoMetadata, callback: { (image, error) -> Void in
-                    
-                    if let error = error {
-                        print("Error loading photo metadata: \(error.localizedDescription)")
-                        self.articlesError = APIError.imageDownload
-                    }
-                    
-                    if let image = image {
-                        photos.append(PlacePhotos(id: index, photo: image, attributedString: photoMetadata.attributions))
-                    }
-                    group.leave()
+            guard let photoMetadata = place.photos else { return }
+            try await Task.sleep(seconds: 2)
+            let photos = try await self.dataManager.getPlacePhotos(photoMetadatas: photoMetadata)
+            let photosSorted = photos.sorted(by: { $0.id < $1.id })
+            
+            for (n, obj) in photosSorted.enumerated() {
+                let sec = Double(n) * 0.1
+                try await Task.sleep(seconds: sec)
+                await MainActor.run(body: {
+                    self.placePhotos.append(obj)
                 })
             }
-            
-            group.wait()
-            
-            group.notify(queue: .main) {
-                let photosSorted = photos.sorted(by: { $0.id < $1.id })
-                
-                for (n, obj) in photosSorted.enumerated() {
-                    let sec = Double(n) * 0.1
-                    DispatchQueue.main.asyncAfter(deadline: .now() + sec) {
-                        self.placePhotos.append(obj)
-                    }
-                }
-            }
+        } catch let error as APIError {
+            await MainActor.run(body: {
+                self.articlesError = error
+                self.marker = nil
+            })
         }
     }
-    
 }
 

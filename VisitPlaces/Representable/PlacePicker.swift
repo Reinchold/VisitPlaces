@@ -50,7 +50,6 @@ struct PlacePicker: UIViewControllerRepresentable {
 
         func viewController(_ viewController: GMSAutocompleteViewController, didAutocompleteWith place: GMSPlace) {
             DispatchQueue.main.async {
-                print("🏛: ", place.description.description as Any)
                 self.parent.address =  place.name!
                 self.parent.presentationMode.wrappedValue.dismiss()
                 self.parent.autocompleteController.reloadInputViews()
