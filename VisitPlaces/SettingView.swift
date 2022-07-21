@@ -9,7 +9,7 @@ import SwiftUI
 
 struct CheckboxField: View, Identifiable {
     
-    @ObservedObject var rootViewModel: RootViewModel
+    @EnvironmentObject var rootViewModel: RootViewModel
     
     let id: String
     let label: String
@@ -23,8 +23,7 @@ struct CheckboxField: View, Identifiable {
          size: CGFloat = 10,
          color: Color = VPColors.title,
          textSize: Int = 14,
-         callback: @escaping (String)->(),
-         rootViewModel: RootViewModel
+         callback: @escaping (String)->()
     ) {
         self.id = id
         self.label = label
@@ -32,7 +31,6 @@ struct CheckboxField: View, Identifiable {
         self.color = color
         self.textSize = textSize
         self.callback = callback
-        self.rootViewModel = rootViewModel
     }
     
     var body: some View {
@@ -127,8 +125,7 @@ struct SettingView: View {
                           label: $0.description,
                           size: 14,
                           textSize: 14,
-                          callback: checkboxSelected,
-                          rootViewModel: rootViewModel)
+                          callback: checkboxSelected)
         }
     }
 

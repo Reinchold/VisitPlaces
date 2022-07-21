@@ -17,13 +17,13 @@ struct PlacesListView: View {
             List {
                 ForEach(rootViewModel.autocompletePredictions, id: \.self) { index in
                     Button(action: {
-                        rootViewModel.getLatLongFromAutocompletePrediction(prediction: index)
                         rootViewModel.autocompletePrediction = index
                         rootViewModel.searchTextField = index.attributedFullText.string
                         
                         Task {
+                            try await rootViewModel.getLocation(prediction: index)
                             try await Task.sleep(seconds: 1)
-                            rootViewModel.endEditing()
+                            await rootViewModel.endEditing()
                         }
                         
                     }) {

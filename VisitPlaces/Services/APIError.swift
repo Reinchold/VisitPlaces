@@ -7,62 +7,35 @@
 
 import Foundation
 
-enum APIError: LocalizedError {
-    
-    case urlError(URLError)
-    case responseError((Int, String))
-    case decodingError(DecodingError)
-    case genericError
+enum APIError: Error {
+    case decode
+    case invalidURL
+    case noResponse
+    case unexpectedStatusCode(Int)
     case imageDownload
     case fetchPlace
     case placeDetails
+    case unknown
     
-    /// A localized message describing what error occurred.
-    var errorDescription: String? {
-        switch self { 
-        case .urlError(let error):
-            return error.localizedDescription
-            
-        case .responseError((let status, let message)):
-            
-            let range = (message.range(of: "message\":")?.upperBound
-                            ?? message.startIndex)..<message.endIndex
-            return "Bad response code: \(status) message : \(message[range])"
-            
-        case .decodingError(let error):
-            var errorToReport = error.localizedDescription
-            switch error {
-            case .dataCorrupted(let context):
-                let details = context.underlyingError?.localizedDescription
-                    ?? context.codingPath.map { $0.stringValue }.joined(separator: ".")
-                errorToReport = "\(context.debugDescription) - (\(details))"
-            case .keyNotFound(let key, let context):
-                let details = context.underlyingError?.localizedDescription
-                    ?? context.codingPath.map { $0.stringValue }.joined(separator: ".")
-                errorToReport = "\(context.debugDescription) (key: \(key), \(details))"
-            case .typeMismatch(let type, let context), .valueNotFound(let type, let context):
-                let details = context.underlyingError?.localizedDescription
-                    ?? context.codingPath.map { $0.stringValue }.joined(separator: ".")
-                errorToReport = "\(context.debugDescription) (type: \(type), \(details))"
-            @unknown default:
-                break
-            }
-            return  errorToReport
-            
-        case .genericError:
-            return "Ein unbekannter Fehler ist aufgetreten"
+    var errorDescription: String {
+        switch self {
+        case .decode:
+            return "The context in which the error occurred."
+        case .invalidURL:
+            return "The invalid URL Path error."
+        case .noResponse:
+            return "The Web Service server can supply the data."
+        case .unexpectedStatusCode (let code):
+            return "Unexpected status code: \(code)"
+        case .unknown:
+            return "An unknown error occurred."
         case .imageDownload:
-            return "Beim Hochladen von Fotos ist ein Problem aufgetreten"
+            return "There was a problem uploading photos."
         case .fetchPlace:
-            return "Standort konnte nicht geladen werden"
+            return "Location could not be loaded."
         case .placeDetails:
-            return "Detaillierte Standortbeschreibung konnte nicht geladen werden"
+            return "Detailed location description could not be loaded."
         }
     }
     
-    /// A localized message describing the reason for the failure.
-//    var failureReason: String? {  }
-
-    /// A localized message describing how one might recover from the failure.
-//    var recoverySuggestion: String? {  }
 }

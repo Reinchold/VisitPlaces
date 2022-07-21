@@ -59,7 +59,9 @@ struct SearchField: View {
                     
                     // Search button
                     Button(action: {
-                        rootViewModel.getGeocoding()
+                        Task {
+                            try? await rootViewModel.getGeocoding()
+                        }
                         rootViewModel.autocompletePredictions.removeAll()
                     }, label: {
                         Image(systemName: "magnifyingglass")

@@ -108,13 +108,17 @@ struct GoogleMapsView: UIViewRepresentable {
         }
         
         func mapView(_ mapView: GMSMapView, didTap marker: GMSMarker) -> Bool {
-            parent.rootViewModel.getPlaceDetails(marker)
+            Task {
+                try? await parent.rootViewModel.getPlaceDetails(marker)                
+            }
             return false
         }
         
         func mapView(_ mapView: GMSMapView, didTapAt coordinate: CLLocationCoordinate2D) {
             parent.rootViewModel.gmsPlace = nil
-            parent.rootViewModel.endEditing()
+            Task {
+                await parent.rootViewModel.endEditing()
+            }
         }
     }
 
